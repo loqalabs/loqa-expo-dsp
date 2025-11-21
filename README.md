@@ -118,6 +118,38 @@ DSP algorithms are implemented in Rust for optimal performance:
 - **Formant Extraction**: <3ms with LPC order 12
 - **Memory**: Zero-copy where possible, minimal allocations
 
+## Development
+
+### Running Tests
+
+**TypeScript Tests (Jest):**
+
+```bash
+npm test              # Run all tests
+npm run test:watch    # Run tests in watch mode
+npm run test:coverage # Run tests with coverage report
+```
+
+**iOS Tests (XCTest):**
+
+iOS tests are located in `ios/Tests/` and will run through the example app's Xcode test target:
+
+```bash
+cd example
+npx expo run:ios
+# Then run tests via Xcode's test navigator (Cmd+U)
+```
+
+**Android Tests (JUnit):**
+
+Android tests are located in `android/src/test/` and will run through the example app's Gradle:
+
+```bash
+cd example
+npx expo run:android
+# Tests run via Gradle: ./gradlew testDebugUnitTest
+```
+
 ## License
 
 MIT License - see [LICENSE](LICENSE) for details.

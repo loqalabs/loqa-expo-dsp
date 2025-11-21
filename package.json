@@ -36,6 +36,8 @@
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
     "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
     "validate:structure": "./scripts/validate-module-structure.sh",
     "prepare": "expo-module prepare",
     "prepublishOnly": "expo-module prepublishOnly",

@@ -41,7 +41,7 @@ development_status:
   1-3-implement-ios-swift-ffi-bindings-scaffold: done
   1-4-implement-android-kotlin-jni-bindings-scaffold: done
   1-5-create-typescript-api-scaffold-with-types: done
-  1-6-set-up-jest-testing-infrastructure: ready-for-dev
+  1-6-set-up-jest-testing-infrastructure: done
   1-7-configure-github-actions-ci-cd-pipeline: ready-for-dev
   1-8-create-package-configuration-for-npm: ready-for-dev
   epic-1-retrospective: optional
