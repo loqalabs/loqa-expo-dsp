@@ -22,4 +22,16 @@ Pod::Spec.new do |s|
 
   # Swift and Objective-C source files
   s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+
+  # Rust XCFramework (supports device + simulator)
+  s.vendored_frameworks = "RustFFI/LoqaVoiceDSP.xcframework"
+  s.preserve_paths = "RustFFI/LoqaVoiceDSP.xcframework"
+
+  # Fallback: Static library (device only, for legacy support)
+  # s.vendored_libraries = "RustFFI/libloqua_voice_dsp.a"
+  # s.preserve_paths = "RustFFI/libloqua_voice_dsp.a"
+
+  # Link required system frameworks and libraries
+  s.frameworks = 'Foundation'
+  s.libraries = 'c++', 'resolv'
 end

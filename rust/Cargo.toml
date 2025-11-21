@@ -1,0 +1,23 @@
+[package]
+name = "loqa-audio-dsp-wrapper"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "loqua_voice_dsp"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+# loqa-voice-dsp dependency declaration (AC1 requirement)
+# Core DSP library for voice analysis (pitch, formants, spectral features)
+loqa-voice-dsp = "0.1"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+strip = true
+
+[[example]]
+name = "test_build"
+path = "examples/test_build.rs"

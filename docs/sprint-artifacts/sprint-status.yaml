@@ -37,7 +37,7 @@ story_location: docs/sprint-artifacts
 development_status:
   epic-1: backlog
   1-1-initialize-expo-module-project-structure: done
-  1-2-set-up-rust-build-infrastructure: ready-for-dev
+  1-2-set-up-rust-build-infrastructure: done
   1-3-implement-ios-swift-ffi-bindings-scaffold: ready-for-dev
   1-4-implement-android-kotlin-jni-bindings-scaffold: ready-for-dev
   1-5-create-typescript-api-scaffold-with-types: ready-for-dev
@@ -74,12 +74,12 @@ development_status:
   epic-4-retrospective: optional
 
   epic-5: backlog
-  5-1-create-comprehensive-readme-md: drafted
-  5-2-create-api-md-reference-documentation: drafted
-  5-3-create-integration-guide-md-with-common-patterns: drafted
-  5-4-build-example-app-with-all-four-dsp-functions: drafted
-  5-5-add-performance-benchmarking-to-example-app: drafted
-  5-6-finalize-package-json-and-publishing-configuration: drafted
-  5-7-create-changelog-md-and-releasing-md: drafted
-  5-8-publish-v0-1-0-to-npm-registry: drafted
+  5-1-create-comprehensive-readme-md: ready-for-dev
+  5-2-create-api-md-reference-documentation: ready-for-dev
+  5-3-create-integration-guide-md-with-common-patterns: ready-for-dev
+  5-4-build-example-app-with-all-four-dsp-functions: ready-for-dev
+  5-5-add-performance-benchmarking-to-example-app: ready-for-dev
+  5-6-finalize-package-json-and-publishing-configuration: ready-for-dev
+  5-7-create-changelog-md-and-releasing-md: ready-for-dev
+  5-8-publish-v0-1-0-to-npm-registry: ready-for-dev
   epic-5-retrospective: optional

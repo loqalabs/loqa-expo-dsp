@@ -27,6 +27,16 @@ android {
     }
   }
 
+  sourceSets {
+    main {
+      jniLibs.srcDirs = ['src/main/jniLibs']
+    }
+  }
+
+  packagingOptions {
+    pickFirst 'lib/*/libloqua_voice_dsp.so'
+  }
+
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_17
     targetCompatibility JavaVersion.VERSION_17
