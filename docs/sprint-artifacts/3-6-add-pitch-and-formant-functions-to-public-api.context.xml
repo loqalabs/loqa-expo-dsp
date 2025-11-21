@@ -1,0 +1,106 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>6</storyId>
+    <title>Add Pitch and Formant Functions to Public API</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-6-add-pitch-and-formant-functions-to-public-api.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>pitch and formant functions exported and documented</iWant>
+    <soThat>users can discover and use voice analysis features</soThat>
+    <tasks>
+- Export detectPitch and extractFormants from src/index.ts
+- Export types (PitchResult, FormantsResult, options)
+- Add comprehensive JSDoc comments
+- Verify TypeScript .d.ts generation
+- Update README with examples
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given functions complete, When updating API, Then src/index.ts exports detectPitch, extractFormants, and related types
+AC2: Given exports added, When checking docs, Then all have JSDoc with @param, @returns, @throws, @example
+AC3: Given TypeScript compiles, When checking output, Then produces correct .d.ts type definitions
+AC4: Given documentation, When updating README, Then includes pitch and formant usage examples
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Public API</title>
+        <section>API Contracts - Module Exports</section>
+        <snippet>Follow computeFFT export pattern. Comprehensive JSDoc. TypeScript .d.ts generation. README examples.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/index.ts</path>
+        <kind>module</kind>
+        <symbol>index</symbol>
+        <lines>all</lines>
+        <reason>Add pitch and formant exports to public API</reason>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <kind>documentation</kind>
+        <symbol>README</symbol>
+        <lines>all</lines>
+        <reason>Add pitch and formant usage examples</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="typescript" version="^5.3.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT export pattern from Story 2.7
+- JSDoc with @param, @returns, @throws, @example
+- README examples: pitch detection and formant extraction
+- TypeScript compilation must pass
+- Depends on Story 3.5 (tests passing)
+- Completes Epic 3 - three DSP functions now available
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Public API Exports</name>
+      <kind>TypeScript module exports</kind>
+      <signature>
+// src/index.ts
+export { computeFFT } from './computeFFT';
+export { detectPitch } from './detectPitch';
+export { extractFormants } from './extractFormants';
+export type {
+  FFTOptions, FFTResult,
+  PitchDetectionOptions, PitchResult,
+  FormantExtractionOptions, FormantsResult
+} from './types';
+      </signature>
+      <path>src/index.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify TypeScript compilation. Check .d.ts exports. Test imports in example app. Verify JSDoc in IDE. Test README examples.
+    </standards>
+    <locations>
+Verification via TypeScript compilation and manual testing
+    </locations>
+    <ideas>
+- Run tsc, verify no errors (AC3)
+- Check lib/index.d.ts exports all functions and types (AC1, AC3)
+- Import in example app, verify autocomplete (AC2, AC3)
+- Test README examples actually work (AC4)
+    </ideas>
+  </tests>
+</story-context>

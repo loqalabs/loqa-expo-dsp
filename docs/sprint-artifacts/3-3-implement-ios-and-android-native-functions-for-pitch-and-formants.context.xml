@@ -1,0 +1,115 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>3</storyId>
+    <title>Implement iOS and Android Native Functions for Pitch and Formants</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-3-implement-ios-and-android-native-functions-for-pitch-and-formants.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>pitch and formant functions working on iOS and Android</iWant>
+    <soThat>native apps can perform voice analysis</soThat>
+    <tasks>
+- Implement iOS detectPitch in Swift
+- Implement iOS extractFormants in Swift
+- Implement Android detectPitch in Kotlin
+- Implement Android extractFormants in Kotlin
+- Follow FFT memory management patterns
+- Test on both platforms
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust functions exist, When implementing iOS, Then Swift exposes detectPitch and extractFormants AsyncFunctions
+AC2: Given Rust functions exist, When implementing Android, Then Kotlin exposes detectPitch and extractFormants AsyncFunctions
+AC3: Given functions implemented, When calling, Then follow FFT memory management pattern (defer blocks for iOS)
+AC4: Given results returned, When checking, Then return proper typed dictionaries matching TypeScript types
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Memory Management</title>
+        <section>Memory Management at FFI/JNI Boundary</section>
+        <snippet>iOS: Use defer blocks for Rust memory cleanup. Android: JNI handles primitives automatically. Follow FFT pattern from Stories 2.2 and 2.3.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>ios/LoqaAudioDspModule.swift</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Add detectPitch and extractFormants following computeFFT pattern</reason>
+      </artifact>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Add detectPitch and extractFormants following computeFFT pattern</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ios>
+        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Rust pitch/formant functions from Stories 3.1, 3.2" />
+      </ios>
+      <android>
+        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust pitch/formant functions from Stories 3.1, 3.2" />
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT pattern from Stories 2.2 and 2.3
+- iOS: defer blocks for memory safety
+- Android: JNI automatic marshalling
+- Return typed dictionaries matching PitchResult and FormantsResult
+- Cross-platform consistency (iOS and Android return identical structures)
+- Depends on Stories 3.1, 3.2 (Rust functions), 2.2, 2.3 (FFT pattern)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectPitch (iOS/Android)</name>
+      <kind>Expo AsyncFunction</kind>
+      <signature>
+// iOS
+AsyncFunction("detectPitch") { (buffer: [Float], sampleRate: Int) -&gt; [String: Any] }
+
+// Android
+AsyncFunction("detectPitch") { buffer: FloatArray, sampleRate: Int -&gt; Map&lt;String, Any&gt; }
+
+// Returns: ["frequency": Float, "confidence": Float, "isVoiced": Bool]
+      </signature>
+      <path>ios/LoqaAudioDspModule.swift, android/.../LoqaAudioDspModule.kt</path>
+    </interface>
+    <interface>
+      <name>extractFormants (iOS/Android)</name>
+      <kind>Expo AsyncFunction</kind>
+      <signature>
+// Returns: ["f1": Float, "f2": Float, "f3": Float, "bandwidths": ["f1": Float, "f2": Float, "f3": Float]]
+      </signature>
+      <path>ios/LoqaAudioDspModule.swift, android/.../LoqaAudioDspModule.kt</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with synthetic pitch tones. Test with vowel recordings for formants. Verify cross-platform consistency. Use Memory Graph Debugger (iOS) and Android Profiler.
+    </standards>
+    <locations>
+Manual testing - formal tests in Story 3.5
+    </locations>
+    <ideas>
+- Test 440 Hz tone on both platforms, verify matching results (AC1, AC2, AC4)
+- Test vowel sample, verify F1/F2/F3 match on iOS and Android (AC4)
+- Verify no memory leaks with platform tools (AC3)
+    </ideas>
+  </tests>
+</story-context>

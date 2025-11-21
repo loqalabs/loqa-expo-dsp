@@ -1,0 +1,130 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>1</storyId>
+    <title>Initialize Expo Module Project Structure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-1-initialize-expo-module-project-structure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a standard Expo module project structure</iWant>
+    <soThat>I can develop native iOS and Android bindings following Expo best practices</soThat>
+    <tasks>
+- Run create-expo-module CLI
+  - Execute: `npx create-expo-module@latest loqa-audio-dsp --slug loqa-audio-dsp --name LoqaAudioDsp --package @loqalabs/loqa-audio-dsp --example`
+  - Verify root package.json contains Expo module metadata
+  - Verify src/ directory exists
+  - Verify ios/ directory contains LoqaAudioDsp.podspec and LoqaAudioDspModule.swift
+  - Verify android/ directory contains build.gradle and LoqaAudioDspModule.kt
+  - Verify example/ directory exists with demo Expo app
+  - Verify expo-module.config.json exists
+- Configure TypeScript with strict mode
+  - Verify tsconfig.json exists
+  - Ensure "strict": true is enabled in compiler options
+  - Verify TypeScript compiles without errors
+- Set up code quality tools
+  - Verify .eslintrc.js or eslint config exists
+  - Verify .prettierrc or prettier config exists
+  - Run ESLint to ensure no initial errors
+  - Run Prettier to verify formatting
+- Create initial documentation
+  - Verify README.md exists
+  - Update README.md with project description: "Production-grade audio DSP analysis for React Native/Expo"
+  - Include basic project information in README
+- Configure project metadata
+  - Set package name to @loqalabs/loqa-audio-dsp in package.json
+  - Configure for iOS 15.1+ minimum version
+  - Configure for Android API 24+ minimum version
+  - Create .gitignore with node_modules, build artifacts, and IDE files
+- Verify project builds
+  - Run `npm install` successfully
+  - Verify TypeScript compilation works
+  - Verify no build errors in initial setup
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given I am starting a new Expo native module project, When I run `npx create-expo-module@latest loqa-audio-dsp`, Then the following structure is created: Root package.json with Expo module metadata, src/ directory for TypeScript source, ios/ directory with LoqaAudioDsp.podspec and LoqaAudioDspModule.swift, android/ directory with build.gradle and LoqaAudioDspModule.kt, example/ directory with demo Expo app, expo-module.config.json with module configuration
+
+AC2: Given the project structure is created, When I examine the TypeScript configuration, Then tsconfig.json exists with strict mode enabled
+
+AC3: Given the project is initialized, When I check code quality tools, Then ESLint and Prettier are configured
+
+AC4: Given the project structure is complete, When I check the root directory, Then an initial README.md file exists with project description
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Project Initialization</title>
+        <section>Project Initialization</section>
+        <snippet>Use `npx create-expo-module@latest loqa-audio-dsp --slug loqa-audio-dsp --name LoqaAudioDsp --package @loqalabs/loqa-audio-dsp --example` to establish standard Expo module project structure with iOS/Android templates, TypeScript API scaffolding, and package.json with Expo module metadata.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Technology Stack Details</title>
+        <section>Technology Stack Details</section>
+        <snippet>TypeScript 5.3+ with strict mode enabled, Swift 5.5+ for iOS, Kotlin 1.9+ for Android. iOS minimum 15.1+, Android minimum API 24+. Use Expo Modules API for standardized module creation and automatic linking.</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 1 - Story 1.1</title>
+        <section>Story 1.1: Initialize Expo Module Project Structure</section>
+        <snippet>Use create-expo-module CLI as specified in Architecture document. Configure for both iOS 15.1+ and Android API 24+. Set package name as @loqalabs/loqa-audio-dsp. Include .gitignore for node_modules, build artifacts, and IDE files.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <!-- No existing code - this is the foundation story -->
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo" version="^54.0.0" type="peer" />
+        <package name="react" version="*" type="peer" />
+        <package name="react-native" version="*" type="peer" />
+        <package name="typescript" version="^5.3.0" type="dev" />
+        <package name="expo-module-scripts" version="^3.0.0" type="dev" />
+        <package name="eslint" version="^8.0.0" type="dev" />
+        <package name="prettier" version="latest" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Use Expo Modules API (not legacy React Native modules) for standardized module creation
+- Package name must be @loqalabs/loqa-audio-dsp
+- iOS minimum version: 15.1+
+- Android minimum API level: 24 (Android 7.0+)
+- TypeScript strict mode must be enabled
+- Follow Expo module conventions for auto-linking
+- No conflicts expected - this is the first story in the epic
+  </constraints>
+
+  <interfaces>
+<!-- No interfaces yet - this story creates the foundation structure -->
+  </interfaces>
+
+  <tests>
+    <standards>
+This story establishes the testing foundation. Verify project structure matches expected layout. Ensure TypeScript compiles without errors. Confirm iOS and Android native modules are scaffolded correctly. Example app should build successfully (basic check). Tests will be set up in Story 1.6.
+    </standards>
+    <locations>
+__tests__/ (to be created in Story 1.6)
+ios/Tests/ (to be created in Story 1.6)
+android/src/test/ (to be created in Story 1.6)
+    </locations>
+    <ideas>
+- Verify package.json contains correct Expo module metadata (AC1)
+- Verify directory structure matches Architecture document expectations (AC1)
+- Verify tsconfig.json has strict mode enabled (AC2)
+- Verify ESLint and Prettier configs exist (AC3)
+- Verify README.md contains project description (AC4)
+- Run `npm install` and verify no errors
+- Run TypeScript compilation and verify no errors
+    </ideas>
+  </tests>
+</story-context>

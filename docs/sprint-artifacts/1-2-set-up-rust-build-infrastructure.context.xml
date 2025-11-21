@@ -1,0 +1,152 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>2</storyId>
+    <title>Set Up Rust Build Infrastructure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-2-set-up-rust-build-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>Rust compilation integrated into the native build process</iWant>
+    <soThat>the loqa-voice-dsp crate is automatically built for iOS and Android</soThat>
+    <tasks>
+- Create Rust project structure
+  - Create rust/ directory in project root
+  - Create Cargo.toml with loqa-voice-dsp dependency
+  - Configure Cargo.toml with appropriate version of loqa-voice-dsp crate
+  - Set up lib.rs or appropriate Rust source files if needed
+- Create iOS build script
+  - Create build-ios.sh in rust/ directory
+  - Configure script to compile for arm64 architecture (iOS devices)
+  - Configure script to compile for x86_64 architecture (iOS simulator)
+  - Create universal binary combining device + simulator architectures
+  - Use cargo with --release flag for optimizations
+  - Enable LTO (Link-Time Optimization) for performance
+  - Make script executable (chmod +x)
+- Create Android build script
+  - Create build-android.sh in rust/ directory
+  - Configure script to compile for arm64-v8a architecture
+  - Configure script to compile for armeabi-v7a architecture
+  - Configure script to compile for x86_64 architecture
+  - Use cargo with --release flag for optimizations
+  - Enable LTO (Link-Time Optimization) for performance
+  - Make script executable (chmod +x)
+- Configure iOS Podspec
+  - Update LoqaAudioDsp.podspec to include libloqua_voice_dsp.a
+  - Create ios/RustFFI/ directory
+  - Configure Podspec to link the static library
+  - Verify library path: ios/RustFFI/libloqua_voice_dsp.a
+- Configure Android build.gradle
+  - Update build.gradle to include .so libraries
+  - Create android/src/main/jniLibs/ directory structure
+  - Create subdirectories for each architecture (arm64-v8a, armeabi-v7a, x86_64)
+  - Configure gradle to package the libraries
+  - Verify library paths
+- Test build process
+  - Run build-ios.sh and verify successful compilation
+  - Run build-android.sh and verify successful compilation
+  - Verify compiled libraries exist in correct locations
+  - Verify libraries are properly linked in native builds
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given the Expo module structure exists, When I add Rust build configuration, Then a rust/ directory is created with: Cargo.toml declaring loqa-voice-dsp dependency, build-ios.sh script that compiles for iOS architectures (arm64, x86_64 simulator), build-android.sh script that compiles for Android architectures (arm64-v8a, armeabi-v7a, x86_64)
+
+AC2: Given Rust build scripts exist, When I configure iOS Podspec, Then it is configured to include compiled libloqua_voice_dsp.a
+
+AC3: Given Rust build scripts exist, When I configure Android build.gradle, Then it is configured to include compiled libloqua_voice_dsp.so
+
+AC4: Given build scripts are configured, When I run the iOS build script, Then Rust compiles in release mode with optimizations enabled
+
+AC5: Given build scripts are configured, When I run builds, Then compiled libraries are placed in correct platform-specific directories: iOS: ios/RustFFI/libloqua_voice_dsp.a, Android: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Rust FFI/JNI Integration</title>
+        <section>Rust FFI/JNI Integration</section>
+        <snippet>Use loqa-voice-dsp crate for DSP core. Build with cargo --release flag and enable LTO for performance targets. iOS requires universal binary for device + simulator. Android requires separate .so for each architecture. Reference VoicelineDSP v0.2.0 for Rust build patterns.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Project Structure</title>
+        <section>Project Structure - rust/ directory</section>
+        <snippet>rust/ directory contains Cargo.toml (Rust dependencies - loqa-voice-dsp), build-ios.sh (iOS library build script), and build-android.sh (Android library build script). iOS output: ios/RustFFI/libloqua_voice_dsp.a. Android output: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so</snippet>
+      </doc>
+      <doc>
+        <path>docs/epics.md</path>
+        <title>Epic 1 - Story 1.2</title>
+        <section>Story 1.2: Set Up Rust Build Infrastructure</section>
+        <snippet>Use cargo with --release flag for optimizations. Enable LTO (Link-Time Optimization) for performance. iOS requires universal binary for device + simulator. Target architectures - iOS: arm64, x86_64; Android: arm64-v8a, armeabi-v7a, x86_64. Performance target: <5ms processing latency.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>ios/LoqaAudioDsp.podspec</path>
+        <kind>configuration</kind>
+        <symbol>LoqaAudioDsp.podspec</symbol>
+        <lines>all</lines>
+        <reason>Needs modification to include Rust static library</reason>
+      </artifact>
+      <artifact>
+        <path>android/build.gradle</path>
+        <kind>configuration</kind>
+        <symbol>build.gradle</symbol>
+        <lines>all</lines>
+        <reason>Needs modification to include Rust shared libraries</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <rust>
+        <crate name="loqa-voice-dsp" version="0.x" note="External crate - battle-tested DSP algorithms" />
+      </rust>
+      <system>
+        <requirement>Rust toolchain (rustc, cargo)</requirement>
+        <requirement>iOS: Xcode command line tools</requirement>
+        <requirement>Android: NDK r26+ installed</requirement>
+      </system>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Rust compilation must use --release flag for optimizations
+- Must enable LTO (Link-Time Optimization) for <5ms performance target
+- iOS: Build universal binary for arm64 (devices) and x86_64 (simulators)
+- Android: Build separate .so files for arm64-v8a, armeabi-v7a, x86_64
+- iOS library path must be: ios/RustFFI/libloqua_voice_dsp.a
+- Android library paths must be: android/src/main/jniLibs/{arch}/libloqua_voice_dsp.so
+- Depends on Story 1.1 (Expo module structure must exist)
+- Prepares foundation for FFI/JNI bindings in Stories 1.3 and 1.4
+  </constraints>
+
+  <interfaces>
+<!-- No interfaces yet - this story creates compiled libraries that will be called via FFI/JNI in Stories 1.3 and 1.4 -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Run build scripts manually to verify compilation. Check that libraries are created in correct locations. Verify libraries are properly formatted (use `file` command). Confirm libraries are included in iOS/Android builds. Test on clean build to ensure reproducibility.
+    </standards>
+    <locations>
+Manual verification for this story - automated tests in Story 1.6
+Verify: ios/RustFFI/libloqua_voice_dsp.a exists after iOS build
+Verify: android/src/main/jniLibs/*/libloqua_voice_dsp.so exist after Android build
+    </locations>
+    <ideas>
+- Run build-ios.sh and verify exit code 0 (AC1, AC4)
+- Check ios/RustFFI/libloqua_voice_dsp.a exists and is valid (AC2, AC5)
+- Run build-android.sh and verify exit code 0 (AC1, AC4)
+- Check android/src/main/jniLibs/{arm64-v8a,armeabi-v7a,x86_64}/libloqua_voice_dsp.so exist (AC3, AC5)
+- Use `file` command to verify library formats
+- Verify Podspec includes library reference (AC2)
+- Verify build.gradle includes library packaging (AC3)
+    </ideas>
+  </tests>
+</story-context>

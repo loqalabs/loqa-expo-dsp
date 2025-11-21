@@ -1,0 +1,106 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>3</storyId>
+    <title>Implement TypeScript analyzeSpectrum API</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-3-implement-typescript-analyzespectrum-api.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a clean TypeScript API for spectral analysis</iWant>
+    <soThat>users have a typed, validated interface to spectral features</soThat>
+    <tasks>
+- Create src/analyzeSpectrum.ts
+- Implement input validation
+- Call native module
+- Convert results to TypeScript types
+- Add error handling
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given native functions work, When implementing, Then creates src/analyzeSpectrum.ts with proper signature
+AC2: Given function created, When validating, Then validates audioBuffer and sampleRate
+AC3: Given validated, When calling, Then calls LoqaAudioDspModule.analyzeSpectrum
+AC4: Given native returns, When converting, Then converts result to SpectrumResult type
+AC5: Given errors, When wrapping, Then wraps native errors in NativeModuleError
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - TypeScript API</title>
+        <section>API Contracts - TypeScript Public API</section>
+        <snippet>Follow computeFFT and pitch/formant patterns: validate inputs, call native, convert results, handle errors. Use existing validation functions. Return strongly-typed SpectrumResult.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/types.ts</path>
+        <kind>module</kind>
+        <symbol>SpectrumResult, SpectrumAnalysisOptions</symbol>
+        <lines>all</lines>
+        <reason>Type definitions from Story 1.5</reason>
+      </artifact>
+      <artifact>
+        <path>src/validation.ts</path>
+        <kind>module</kind>
+        <symbol>validation functions</symbol>
+        <lines>all</lines>
+        <reason>Reuse validation from Story 2.4</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo-modules-core" version="*" type="peer" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT pattern from Story 2.5
+- Follow pitch/formant pattern from Story 3.4
+- Reuse existing validation functions
+- Accept Float32Array or number[] for audio buffers
+- Return strongly-typed SpectrumResult with centroid, rolloff, tilt
+- Wrap native errors in NativeModuleError
+- Add debug logging
+- Depends on Stories 2.4 (validation), 2.5, 3.4 (pattern), 4.2 (native functions)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>analyzeSpectrum</name>
+      <kind>TypeScript async function</kind>
+      <signature>
+export async function analyzeSpectrum(
+  audioBuffer: Float32Array | number[],
+  sampleRate: number,
+  options?: Partial&lt;SpectrumAnalysisOptions&gt;
+): Promise&lt;SpectrumResult&gt;
+      </signature>
+      <path>src/analyzeSpectrum.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Manual testing - comprehensive tests in Story 4.4. Verify TypeScript compilation. Test with synthetic audio.
+    </standards>
+    <locations>
+Manual testing - formal tests in Story 4.4
+    </locations>
+    <ideas>
+- Test with Float32Array and number[] (AC3)
+- Verify validation called (AC2)
+- Verify typed results (AC4)
+- Test error wrapping (AC5)
+- Test with sine wave, verify centroid/rolloff values (AC1, AC4)
+    </ideas>
+  </tests>
+</story-context>

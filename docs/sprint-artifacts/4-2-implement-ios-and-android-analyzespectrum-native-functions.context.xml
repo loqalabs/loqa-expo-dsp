@@ -1,0 +1,111 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>2</storyId>
+    <title>Implement iOS and Android analyzeSpectrum Native Functions</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-2-implement-ios-and-android-analyzespectrum-native-functions.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>analyzeSpectrum working on both platforms</iWant>
+    <soThat>spectral analysis capabilities work cross-platform</soThat>
+    <tasks>
+- Update iOS LoqaAudioDspModule.swift with analyzeSpectrum
+- Update Android LoqaAudioDspModule.kt with analyzeSpectrum
+- Implement input validation
+- Handle memory management
+- Test on both platforms
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust bindings exist, When implementing iOS, Then exposes AsyncFunction("analyzeSpectrum") returning SpectrumResult dictionary
+AC2: Given Rust bindings exist, When implementing Android, Then exposes AsyncFunction("analyzeSpectrum") via Kotlin JNI returning map
+AC3: Given functions implemented, When validating, Then both platforms validate inputs (buffer, sample rate)
+AC4: Given errors, When handling, Then both platforms handle errors consistently
+AC5: Given memory, When managing, Then follows established patterns
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Native Integration</title>
+        <section>Native Platform Integration</section>
+        <snippet>Follow computeFFT and pitch/formant patterns. iOS: defer blocks for memory safety. Android: JNI automatic marshalling. Return typed dictionaries matching TypeScript SpectrumResult.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>ios/LoqaAudioDspModule.swift</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Add analyzeSpectrum AsyncFunction following established pattern</reason>
+      </artifact>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Add analyzeSpectrum AsyncFunction following established pattern</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ios>
+        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Rust spectral analysis from Story 4.1" />
+      </ios>
+      <android>
+        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust spectral analysis from Story 4.1" />
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT pattern from Stories 2.2, 2.3
+- Follow pitch/formant pattern from Story 3.3
+- iOS: defer blocks for memory cleanup
+- Android: JNI automatic FloatArray marshalling
+- Return typed dictionaries: ["centroid": Float, "rolloff": Float, "tilt": Float]
+- Cross-platform consistency (iOS and Android return identical structures)
+- Input validation: buffer not empty, sample rate &gt; 0
+- Depends on Story 4.1 (Rust analyze_spectrum_rust)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>analyzeSpectrum (iOS/Android)</name>
+      <kind>Expo AsyncFunction</kind>
+      <signature>
+// iOS
+AsyncFunction("analyzeSpectrum") { (buffer: [Float], sampleRate: Int) -&gt; [String: Any] }
+
+// Android
+AsyncFunction("analyzeSpectrum") { buffer: FloatArray, sampleRate: Int -&gt; Map&lt;String, Any&gt; }
+
+// Returns: ["centroid": Float, "rolloff": Float, "tilt": Float]
+      </signature>
+      <path>ios/LoqaAudioDspModule.swift, android/.../LoqaAudioDspModule.kt</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with synthetic audio: sine wave, white noise, pink noise. Verify cross-platform consistency. Use Memory Graph Debugger (iOS) and Android Profiler for memory validation.
+    </standards>
+    <locations>
+Manual testing - formal tests in Story 4.4
+    </locations>
+    <ideas>
+- Test sine wave on both platforms, verify matching centroid/rolloff/tilt (AC1, AC2)
+- Test white noise, verify consistent results across platforms (AC4)
+- Test pink noise, verify negative tilt on both platforms (AC1, AC2)
+- Verify no memory leaks with platform tools (AC5)
+- Test input validation with empty buffer and invalid sample rates (AC3)
+    </ideas>
+  </tests>
+</story-context>

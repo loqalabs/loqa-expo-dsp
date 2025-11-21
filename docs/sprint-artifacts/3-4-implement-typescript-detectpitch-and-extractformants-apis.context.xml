@@ -1,0 +1,117 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>4</storyId>
+    <title>Implement TypeScript detectPitch and extractFormants APIs</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-4-implement-typescript-detectpitch-and-extractformants-apis.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>TypeScript APIs for pitch and formant detection</iWant>
+    <soThat>users have typed, validated interfaces to voice analysis</soThat>
+    <tasks>
+- Create src/detectPitch.ts
+- Create src/extractFormants.ts
+- Implement input validation
+- Call native modules
+- Convert results to typed interfaces
+- Add error handling
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given native functions exist, When implementing TypeScript, Then create detectPitch and extractFormants functions
+AC2: Given functions created, When validating, Then use validateAudioBuffer and validateSampleRate
+AC3: Given validation passes, When calling native, Then marshal data following computeFFT pattern
+AC4: Given native returns, When processing, Then convert to PitchResult and FormantsResult types
+AC5: Given errors occur, When handling, Then wrap in NativeModuleError
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - TypeScript API</title>
+        <section>API Contracts - TypeScript Public API</section>
+        <snippet>Follow computeFFT pattern: validate inputs, call native, convert results, handle errors. Use existing validation functions. Return typed results with Float32Array where appropriate.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/types.ts</path>
+        <kind>module</kind>
+        <symbol>PitchResult, FormantsResult</symbol>
+        <lines>all</lines>
+        <reason>Type definitions from Story 1.5</reason>
+      </artifact>
+      <artifact>
+        <path>src/validation.ts</path>
+        <kind>module</kind>
+        <symbol>validation functions</symbol>
+        <lines>all</lines>
+        <reason>Reuse validation from Story 2.4</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo-modules-core" version="*" type="peer" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT pattern from Story 2.5
+- Reuse existing validation functions
+- Accept Float32Array or number[] for audio buffers
+- Return strongly-typed results (PitchResult, FormantsResult)
+- Wrap native errors in NativeModuleError
+- Add debug logging
+- Depends on Stories 2.4 (validation), 2.5 (pattern), 3.3 (native functions)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detectPitch</name>
+      <kind>TypeScript async function</kind>
+      <signature>
+export async function detectPitch(
+  audioBuffer: Float32Array | number[],
+  sampleRate: number,
+  options?: Partial&lt;PitchDetectionOptions&gt;
+): Promise&lt;PitchResult&gt;
+      </signature>
+      <path>src/detectPitch.ts</path>
+    </interface>
+    <interface>
+      <name>extractFormants</name>
+      <kind>TypeScript async function</kind>
+      <signature>
+export async function extractFormants(
+  audioBuffer: Float32Array | number[],
+  sampleRate: number,
+  options?: Partial&lt;FormantExtractionOptions&gt;
+): Promise&lt;FormantsResult&gt;
+      </signature>
+      <path>src/extractFormants.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Manual testing - comprehensive tests in Story 3.5. Verify TypeScript compilation. Test with synthetic audio.
+    </standards>
+    <locations>
+Manual testing - formal tests in Story 3.5
+    </locations>
+    <ideas>
+- Test with Float32Array and number[] (AC3)
+- Verify validation called (AC2)
+- Verify typed results (AC4)
+- Test error wrapping (AC5)
+    </ideas>
+  </tests>
+</story-context>

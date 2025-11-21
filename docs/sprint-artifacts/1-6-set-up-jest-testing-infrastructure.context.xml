@@ -1,0 +1,159 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>6</storyId>
+    <title>Set Up Jest Testing Infrastructure</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-6-set-up-jest-testing-infrastructure.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a complete testing infrastructure</iWant>
+    <soThat>I can write unit tests for TypeScript, iOS, and Android code</soThat>
+    <tasks>
+- Configure Jest for TypeScript
+  - Install Jest and ts-jest dependencies
+  - Create jest.config.js with ts-jest preset
+  - Configure Jest to ignore native code
+  - Add \_\_tests\_\_/ directory
+  - Add "test" script to package.json: "jest"
+  - Add "test:watch" script: "jest --watch"
+  - Add "test:coverage" script: "jest --coverage"
+- Create TypeScript placeholder tests
+  - Create \_\_tests\_\_/computeFFT.test.ts with placeholder test
+  - Create \_\_tests\_\_/detectPitch.test.ts with placeholder test
+  - Create \_\_tests\_\_/extractFormants.test.ts with placeholder test
+  - Create \_\_tests\_\_/analyzeSpectrum.test.ts with placeholder test
+  - Create \_\_tests\_\_/validation.test.ts with placeholder test
+  - Ensure all tests pass (even if minimal)
+- Set up iOS XCTest infrastructure
+  - Create ios/Tests/ directory
+  - Configure Xcode test target in project
+  - Create FFTTests.swift placeholder
+  - Create PitchDetectionTests.swift placeholder
+  - Create FormantExtractionTests.swift placeholder
+  - Create SpectrumAnalysisTests.swift placeholder
+  - Verify test target compiles
+- Set up Android JUnit infrastructure
+  - Create android/src/test/java/com/loqalabs/loquaaudiodsp/ directory
+  - Add JUnit 4.13+ dependency to build.gradle
+  - Create FFTTests.kt placeholder
+  - Create PitchDetectionTests.kt placeholder
+  - Create FormantExtractionTests.kt placeholder
+  - Create SpectrumAnalysisTests.kt placeholder
+  - Verify tests compile with Gradle
+- Verify test execution
+  - Run `npm test` and verify Jest runs successfully
+  - Run iOS tests via Xcode and verify they execute
+  - Run Android tests via Gradle and verify they execute
+  - Document test execution commands in README or CONTRIBUTING
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given the module structure is complete, When I configure testing frameworks, Then Jest is configured for TypeScript tests: \_\_tests\_\_/ directory created, jest.config.js with ts-jest preset, Package.json includes test scripts: "test", "test:watch"
+
+AC2: Given Jest is configured, When I set up iOS testing, Then iOS XCTest infrastructure is configured: ios/Tests/ directory created, Xcode test target configured, Placeholder test files for each DSP function
+
+AC3: Given Jest is configured, When I set up Android testing, Then Android JUnit infrastructure is configured: android/src/test/ directory created, build.gradle includes JUnit 4.13+ dependency, Placeholder test files for each DSP function
+
+AC4: Given test infrastructure is set up, When I run npm test, Then TypeScript tests run successfully (even if placeholder)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Testing & Quality Tools</title>
+        <section>Testing & Quality Tools</section>
+        <snippet>Jest 29+ with ts-jest for TypeScript testing. XCTest for iOS (built-in with Xcode). JUnit 4.13+ for Android. Test files in \_\_tests\_\_/ directory (Jest convention). Native tests validate FFI/JNI bindings work correctly.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Test Organization</title>
+        <section>Code Organization</section>
+        <snippet>By feature: Each DSP function has its own test file. Shared utilities in separate test files. Placeholder tests created now, real tests in Epic 2+. Jest convention: \_\_tests\_\_/ directory.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>package.json</path>
+        <kind>configuration</kind>
+        <symbol>package.json</symbol>
+        <lines>scripts</lines>
+        <reason>Needs test scripts added: test, test:watch, test:coverage</reason>
+      </artifact>
+      <artifact>
+        <path>android/build.gradle</path>
+        <kind>configuration</kind>
+        <symbol>build.gradle</symbol>
+        <lines>dependencies</lines>
+        <reason>Needs JUnit 4.13+ dependency added</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="jest" version="^29.0.0" type="dev" />
+        <package name="ts-jest" version="latest" type="dev" />
+        <package name="@types/jest" version="latest" type="dev" />
+      </javascript>
+      <android>
+        <package name="junit" version="4.13+" type="test" />
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Use ts-jest for TypeScript test preprocessing
+- Configure Jest to ignore native code (ios/, android/ directories)
+- Native tests run via Xcode (iOS) and Gradle (Android) separately
+- Test framework configuration follows Architecture document
+- Placeholder tests ensure infrastructure works
+- Real test implementation happens in Epic 2+
+- Depends on Story 1.5 (TypeScript types needed for test assertions)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Jest Configuration</name>
+      <kind>Jest config file</kind>
+      <signature>
+module.exports = {
+  preset: 'ts-jest',
+  testEnvironment: 'node',
+  roots: ['&lt;rootDir&gt;/\_\_tests\_\_'],
+  testMatch: ['**/*.test.ts'],
+  moduleFileExtensions: ['ts', 'tsx', 'js', 'jsx'],
+  collectCoverageFrom: ['src/**/*.{ts,tsx}', '!src/**/*.d.ts']
+};
+      </signature>
+      <path>jest.config.js</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Initial tests are minimal placeholders. Verify test frameworks are correctly configured. Ensure tests run without errors. Foundation for comprehensive testing in later epics. Jest tests: TypeScript source. XCTest: iOS native bindings. JUnit: Android native bindings.
+    </standards>
+    <locations>
+\_\_tests\_\_/ - TypeScript tests (Jest)
+ios/Tests/ - iOS tests (XCTest)
+android/src/test/ - Android tests (JUnit)
+    </locations>
+    <ideas>
+- Verify jest.config.js exists and has correct preset (AC1)
+- Verify \_\_tests\_\_/ directory contains test files (AC1)
+- Verify package.json has test scripts (AC1)
+- Run `npm test` and verify Jest executes (AC1, AC4)
+- Verify ios/Tests/ directory exists with XCTest files (AC2)
+- Verify Xcode test target compiles (AC2)
+- Verify android/src/test/ directory exists (AC3)
+- Verify JUnit dependency in build.gradle (AC3)
+- Verify Android tests compile with Gradle (AC3)
+- All placeholder tests should pass
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,186 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>7</storyId>
+    <title>Configure GitHub Actions CI/CD Pipeline</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-7-configure-github-actions-cicd-pipeline.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>automated CI/CD with GitHub Actions</iWant>
+    <soThat>every commit is validated and releases are automatically published</soThat>
+    <tasks>
+- Create CI workflow
+  - Create .github/workflows/ directory
+  - Create ci.yml workflow file
+  - Configure to run on push and pull_request events
+  - Add checkout step with actions/checkout@v4
+  - Add Node.js setup with actions/setup-node@v4 (Node 18)
+  - Add npm ci step (clean install)
+  - Add lint step: npm run lint
+  - Add typecheck step: npm run typecheck
+  - Add test step: npm test
+  - Add security audit step: npm audit --audit-level=high
+  - Use ubuntu-latest runner
+- Create publish workflow
+  - Create publish.yml workflow file
+  - Configure to trigger on tag push (v*)
+  - Add checkout step with actions/checkout@v4
+  - Add Node.js setup with actions/setup-node@v4 and registry-url
+  - Add npm ci step
+  - Add build step: npm run build
+  - Add test step: npm test
+  - Add publish step: npm publish --access public
+  - Configure NODE_AUTH_TOKEN from secrets.NPM_TOKEN
+  - Document NPM_TOKEN requirement in RELEASING.md
+- Add package.json scripts needed by CI
+  - Ensure "lint" script exists: eslint src/**/*.ts
+  - Ensure "typecheck" script exists: tsc --noEmit
+  - Ensure "test" script exists (from Story 1.6)
+  - Ensure "build" script exists: tsc or expo-module-scripts build
+- Verify CI pipeline
+  - Test lint script passes locally
+  - Test typecheck script passes locally
+  - Test that tests pass locally
+  - Push to GitHub and verify CI runs
+  - Confirm all CI steps pass
+- Document CI/CD setup
+  - Add CI badge to README.md
+  - Document NPM_TOKEN setup in RELEASING.md
+  - Document CI pipeline in CONTRIBUTING.md (if exists)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given the codebase is ready for CI, When I create GitHub Actions workflows, Then .github/workflows/ci.yml is created that: Runs on push and pull_request events, Executes lint (ESLint), Executes typecheck (TypeScript), Executes npm test (Jest unit tests), Executes npm audit (security check, fail on high severity), Runs on ubuntu-latest with Node.js 18
+
+AC2: Given CI workflow exists, When I create publish workflow, Then .github/workflows/publish.yml is created that: Triggers on version tags (v*), Runs full test suite, Publishes to npm registry with public access, Uses NPM_TOKEN secret for authentication
+
+AC3: Given both workflows are created, When I verify their configuration, Then both workflows use actions/checkout@v4 and actions/setup-node@v4
+
+AC4: Given workflows are configured, When I push code to repository, Then CI passes on current codebase (even with placeholder implementations)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - CI/CD Pipeline</title>
+        <section>CI/CD Pipeline</section>
+        <snippet>GitHub Actions for CI/CD. CI workflow runs on push/pull_request: lint, typecheck, test, audit. Publish workflow triggers on version tags (v*) and publishes to npm. Use actions/checkout@v4 and actions/setup-node@v4. Node.js 18 on ubuntu-latest.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Deployment Architecture</title>
+        <section>Deployment Architecture - CI/CD Pipeline</section>
+        <snippet>Full CI workflow with ESLint, TypeScript type checking, Jest tests, and npm audit. Automated publish on git tags with NPM_TOKEN secret. All tests must pass before publishing.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>package.json</path>
+        <kind>configuration</kind>
+        <symbol>package.json</symbol>
+        <lines>scripts</lines>
+        <reason>Needs lint, typecheck, and build scripts for CI to call</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="eslint" version="^8.0.0" type="dev" note="For lint script" />
+        <package name="typescript" version="^5.3.0" type="dev" note="For typecheck script" />
+      </javascript>
+      <github>
+        <secret name="NPM_TOKEN" note="Required for automated npm publishing" />
+      </github>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CI must run on every push and pull request
+- All CI steps must pass before merge
+- Publish only on version tags (v*)
+- npm audit must fail on high severity vulnerabilities
+- Use Node.js 18 for consistency
+- NPM_TOKEN secret must be configured in GitHub repo settings
+- Depends on Story 1.6 (test scripts must be available)
+- Integrates with test infrastructure from Story 1.6
+- Supports npm publishing workflow for Story 1.8
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>CI Workflow</name>
+      <kind>GitHub Actions YAML</kind>
+      <signature>
+name: CI
+on: [push, pull_request]
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm test
+      - run: npm audit --audit-level=high
+      </signature>
+      <path>.github/workflows/ci.yml</path>
+    </interface>
+    <interface>
+      <name>Publish Workflow</name>
+      <kind>GitHub Actions YAML</kind>
+      <signature>
+name: Publish to npm
+on:
+  push:
+    tags: ['v*']
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          registry-url: 'https://registry.npmjs.org'
+      - run: npm ci
+      - run: npm run build
+      - run: npm test
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      </signature>
+      <path>.github/workflows/publish.yml</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Run all CI steps locally before committing. Verify CI passes on first push. Test publish workflow will be validated in Story 1.8. Ensure all scripts (lint, typecheck, test, build) work correctly.
+    </standards>
+    <locations>
+Local verification before push
+GitHub Actions UI after push
+    </locations>
+    <ideas>
+- Verify .github/workflows/ci.yml exists with correct configuration (AC1)
+- Verify .github/workflows/publish.yml exists with correct configuration (AC2)
+- Check both workflows use actions/checkout@v4 and actions/setup-node@v4 (AC3)
+- Run `npm run lint` locally and verify passes
+- Run `npm run typecheck` locally and verify passes
+- Run `npm test` locally and verify passes
+- Push to GitHub and check CI workflow runs (AC4)
+- Verify all CI steps pass (AC4)
+- Verify README.md has CI badge
+    </ideas>
+  </tests>
+</story-context>

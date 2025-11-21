@@ -1,0 +1,110 @@
+# Workflow Status Template
+
+# This tracks progress through BMM methodology Analysis, Planning, and Solutioning phases.
+# Implementation phase is tracked separately in sprint-status.yaml
+
+# STATUS DEFINITIONS:
+# ==================
+# Initial Status (before completion):
+#   - required: Must be completed to progress
+#   - optional: Can be completed but not required
+#   - recommended: Strongly suggested but not required
+#   - conditional: Required only if certain conditions met (e.g., if_has_ui)
+#
+# Completion Status:
+#   - {file-path}: File created/found (e.g., "docs/product-brief.md")
+#   - skipped: Optional/conditional workflow that was skipped
+
+generated: "2025-11-20"
+project: "loqa-audio-dsp"
+project_type: "greenfield"
+selected_track: "bmad-method"
+field_type: "greenfield"
+workflow_path: "method-greenfield"
+
+workflow_status:
+  # Phase 0: Discovery (Optional)
+  - id: "product-brief"
+    name: "Product Brief"
+    phase: 0
+    agent: "analyst"
+    command: "/bmad:bmm:workflows:product-brief"
+    status: "docs/product-brief-loqa-audio-dsp-2025-11-20.md"
+    note: "Strategic product planning"
+
+  # Phase 1: Planning
+  - id: "prd"
+    name: "Product Requirements Document"
+    phase: 1
+    agent: "pm"
+    command: "/bmad:bmm:workflows:prd"
+    status: "docs/prd.md"
+    output: "Product Requirements Document with FRs and NFRs"
+
+  - id: "validate-prd"
+    name: "Validate PRD"
+    phase: 1
+    agent: "pm"
+    command: "/bmad:bmm:workflows:validate-prd"
+    status: "optional"
+    note: "Quality check for PRD completeness"
+
+  - id: "create-ux-design"
+    name: "UX Design"
+    phase: 1
+    agent: "ux-designer"
+    command: "/bmad:bmm:workflows:create-ux-design"
+    status: "conditional"
+    note: "Determined after PRD - user/agent decides if needed"
+
+  # Phase 2: Solutioning
+  - id: "create-architecture"
+    name: "Architecture"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:architecture"
+    status: "docs/architecture.md"
+    output: "System architecture document"
+    note: "Complete system design for greenfield projects"
+
+  - id: "create-epics-and-stories"
+    name: "Epics and Stories"
+    phase: 2
+    agent: "pm"
+    command: "/bmad:bmm:workflows:create-epics-and-stories"
+    status: "required"
+    note: "Break down PRD into implementable epics and stories with full context"
+
+  - id: "test-design"
+    name: "Test Design"
+    phase: 2
+    agent: "tea"
+    command: "/bmad:bmm:workflows:test-design"
+    status: "recommended"
+    output: "System-level testability review"
+    note: "Testability assessment before gate check"
+
+  - id: "validate-architecture"
+    name: "Validate Architecture"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:validate-architecture"
+    status: "optional"
+    note: "Quality check for architecture completeness"
+
+  - id: "implementation-readiness"
+    name: "Implementation Readiness"
+    phase: 2
+    agent: "architect"
+    command: "/bmad:bmm:workflows:implementation-readiness"
+    status: "required"
+    note: "Validates PRD + UX + Architecture + Epics + Testability cohesion"
+
+  # Phase 3: Implementation
+  - id: "sprint-planning"
+    name: "Sprint Planning"
+    phase: 3
+    agent: "sm"
+    command: "/bmad:bmm:workflows:sprint-planning"
+    status: "required"
+    note: "Creates sprint plan - subsequent work tracked there"

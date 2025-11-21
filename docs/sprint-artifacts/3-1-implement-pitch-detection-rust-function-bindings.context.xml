@@ -1,0 +1,106 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>1</storyId>
+    <title>Implement Pitch Detection Rust Function Bindings</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-1-implement-pitch-detection-rust-function-bindings.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the loqa-voice-dsp YIN pitch detection exposed via FFI/JNI</iWant>
+    <soThat>iOS and Android can detect pitch from audio buffers</soThat>
+    <tasks>
+- Create Rust FFI for detect_pitch_rust
+- Define PitchResult struct (frequency, confidence, is_voiced)
+- Implement YIN algorithm call
+- Add sample rate validation
+- Handle voiced/unvoiced segments
+- Test with various audio samples
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust loqa-voice-dsp crate compiled, When exposing YIN, Then exports detect_pitch_rust C-compatible function with PitchResult struct
+AC2: Given function exposed, When calling, Then uses YIN algorithm from loqa-voice-dsp
+AC3: Given processing, When validating, Then validates sample rate 8000-48000 Hz
+AC4: Given no pitch, When returning, Then returns null frequency (0.0) if undetected
+AC5: Given result, When checking, Then confidence score between 0.0-1.0
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - DSP Core</title>
+        <section>DSP Core - loqa-voice-dsp</section>
+        <snippet>YIN pitch detection algorithm for accurate fundamental frequency estimation. Sample rate: 8000-48000 Hz. Returns frequency, confidence, and voiced/unvoiced classification. Handle unvoiced segments gracefully (return 0.0 or null).</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>rust/src/lib.rs</path>
+        <kind>module</kind>
+        <symbol>lib</symbol>
+        <lines>all</lines>
+        <reason>Add pitch detection FFI functions following FFT pattern from Story 2.1</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <rust>
+        <crate name="loqa-voice-dsp" version="0.x" note="YIN pitch detection algorithm" />
+      </rust>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow FFT FFI pattern from Story 2.1 (#[no_mangle], extern "C")
+- YIN algorithm for pitch detection (not autocorrelation)
+- Sample rate validation: 8000-48000 Hz
+- Return struct: frequency (f32), confidence (f32), is_voiced (bool)
+- Unvoiced segments: frequency = 0.0, is_voiced = false
+- Confidence: 0.0 (low) to 1.0 (high)
+- Depends on Story 2.1 (Rust FFI pattern established)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>detect_pitch_rust</name>
+      <kind>Rust FFI function</kind>
+      <signature>
+#[no_mangle]
+pub extern "C" fn detect_pitch_rust(
+    buffer: *const f32,
+    length: i32,
+    sample_rate: i32
+) -&gt; PitchResult
+
+#[repr(C)]
+pub struct PitchResult {
+    pub frequency: f32,
+    pub confidence: f32,
+    pub is_voiced: bool
+}
+      </signature>
+      <path>rust/src/lib.rs</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with synthetic tones (440 Hz). Test with voiced/unvoiced speech. Verify confidence scores. Test sample rate validation. Follow testing pattern from Story 2.1.
+    </standards>
+    <locations>
+rust/src/lib.rs (inline tests) OR rust/tests/
+    </locations>
+    <ideas>
+- Test 440 Hz sine wave, verify frequency ~440 Hz (AC1, AC2)
+- Test sample rates: 8000, 44100, 48000 pass; 7999, 48001 fail (AC3)
+- Test silence/noise, verify is_voiced=false, frequency=0.0 (AC4)
+- Verify confidence in range 0.0-1.0 (AC5)
+    </ideas>
+  </tests>
+</story-context>

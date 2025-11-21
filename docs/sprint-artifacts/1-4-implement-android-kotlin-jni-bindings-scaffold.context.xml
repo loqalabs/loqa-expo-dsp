@@ -1,0 +1,181 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>4</storyId>
+    <title>Implement Android Kotlin JNI Bindings Scaffold</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-4-implement-android-kotlin-jni-bindings-scaffold.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>Kotlin JNI bindings to Rust DSP functions</iWant>
+    <soThat>Android can call Rust loqa-voice-dsp functions safely</soThat>
+    <tasks>
+- Create RustBridge.kt
+  - Create android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/ directory
+  - Create RustBridge.kt file
+  - Add System.loadLibrary("loqua_voice_dsp") in init block
+  - Declare external JNI function signatures for Rust functions
+  - Implement placeholder Kotlin wrappers (will be completed in Epic 2)
+  - Add error handling for JNI call failures
+  - Document that JNI handles FloatArray marshalling automatically
+- Update LoqaAudioDspModule.kt
+  - Import RustBridge
+  - Implement Expo Module Definition protocol
+  - Add placeholder async function stubs for: computeFFT, detectPitch, extractFormants, analyzeSpectrum
+  - Use GlobalScope.launch(Dispatchers.Default) for async processing
+  - Add try-catch with Promise rejection
+- Configure JNI integration
+  - Verify build.gradle includes JNI configuration
+  - Ensure .so libraries are packaged correctly
+  - Test System.loadLibrary succeeds
+  - Document automatic primitive array marshalling
+- Verify Android build integration
+  - Ensure RustBridge.kt compiles without errors
+  - Verify build.gradle includes RustJNI package
+  - Test that module initializes successfully
+  - Confirm library loading works
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust libraries are compiled for Android, When I create Kotlin JNI bridge code, Then android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt is created with: JNI external function declarations for Rust functions, System.loadLibrary("loqua_voice_dsp") initialization, Kotlin wrapper functions that handle array marshalling, Error handling for JNI failures
+
+AC2: Given Kotlin JNI bridge exists, When I update LoqaAudioDspModule.kt, Then it implements Expo Module Definition protocol
+
+AC3: Given the module is configured, When I check the module exports, Then it exposes placeholder async functions for future DSP operations
+
+AC4: Given JNI bindings are implemented, When I review memory management, Then JNI handles primitive array marshalling automatically (FloatArray)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Android Kotlin JNI Integration</title>
+        <section>Integration Points - Android (Kotlin JNI)</section>
+        <snippet>JNI automatically manages primitive arrays - simpler than iOS FFI. Use GlobalScope.launch(Dispatchers.Default) for async processing. All native calls wrapped in try-catch with Promise rejection. System.loadLibrary loads .so from jniLibs automatically.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Memory Management at JNI Boundary</title>
+        <section>Memory Management at FFI/JNI Boundary - Android</section>
+        <snippet>JNI handles primitive array marshalling automatically for FloatArray. No manual memory management needed like iOS. Use try-catch for error handling. Process on Dispatchers.Default for background thread execution.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Native Module Interface</title>
+        <section>Native Module Interface - Android</section>
+        <snippet>Use @ExpoMethod annotation for exported functions. Implement ModuleDefinition for Expo integration. Promise-based API for async operations. GlobalScope.launch with Dispatchers.Default for background processing.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Needs implementation of Expo Module Definition with placeholder async functions</reason>
+      </artifact>
+      <artifact>
+        <path>android/build.gradle</path>
+        <kind>configuration</kind>
+        <symbol>build.gradle</symbol>
+        <lines>all</lines>
+        <reason>Must verify JNI configuration and .so packaging</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Compiled Rust library from Story 1.2" />
+      </android>
+      <kotlin>
+        <package name="kotlinx.coroutines" note="For GlobalScope.launch and Dispatchers" />
+      </kotlin>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- JNI automatically handles FloatArray marshalling (simpler than iOS)
+- Use GlobalScope.launch(Dispatchers.Default) for async processing
+- All native calls must be wrapped in try-catch
+- Promise rejection for all errors with consistent error codes
+- Depends on Story 1.2 (Rust libraries must be compiled)
+- Mirrors iOS implementation from Story 1.3 for cross-platform consistency
+- Follows Expo Modules API conventions
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>RustBridge (Placeholder JNI)</name>
+      <kind>Kotlin JNI to Rust</kind>
+      <signature>
+object RustBridge {
+    init {
+        System.loadLibrary("loqua_voice_dsp")
+    }
+
+    external fun placeholderJniFunction(
+        buffer: FloatArray,
+        size: Int
+    ): FloatArray
+
+    // Wrapper with error handling
+    fun placeholderWrapper(buffer: FloatArray, size: Int): FloatArray {
+        return try {
+            placeholderJniFunction(buffer, size)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call failed", e)
+        }
+    }
+}
+      </signature>
+      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt</path>
+    </interface>
+    <interface>
+      <name>LoqaAudioDsp Expo Module</name>
+      <kind>Expo Module Definition</kind>
+      <signature>
+class LoqaAudioDspModule : Module() {
+    override fun definition() = ModuleDefinition {
+        Name("LoqaAudioDsp")
+
+        AsyncFunction("computeFFT") { buffer: FloatArray, options: Map&lt;String, Any&gt; ->
+            GlobalScope.launch(Dispatchers.Default) {
+                try {
+                    // Placeholder implementation
+                } catch (e: Exception) {
+                    promise.reject("FFT_ERROR", e.message, e)
+                }
+            }
+        }
+        // Additional async functions...
+    }
+}
+      </signature>
+      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify Kotlin compiles without errors. Test System.loadLibrary succeeds (library found). Confirm placeholder functions can be called. Verify Promise-based async pattern works. Test error handling with try-catch.
+    </standards>
+    <locations>
+android/src/test/ (to be created in Story 1.6)
+Manual verification for this story
+    </locations>
+    <ideas>
+- Verify RustBridge.kt compiles without errors (AC1)
+- Test System.loadLibrary("loqua_voice_dsp") succeeds (AC1)
+- Verify LoqaAudioDspModule implements Expo Module Definition (AC2)
+- Call placeholder async functions and verify Promise resolution (AC3)
+- Test error handling with invalid inputs (AC4)
+- Verify JNI automatically handles FloatArray marshalling (AC4)
+- Test module loads in example app successfully
+    </ideas>
+  </tests>
+</story-context>

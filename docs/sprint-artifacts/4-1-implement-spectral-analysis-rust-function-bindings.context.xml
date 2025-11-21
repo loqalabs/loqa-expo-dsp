@@ -1,0 +1,123 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>1</storyId>
+    <title>Implement Spectral Analysis Rust Function Bindings</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-1-implement-spectral-analysis-rust-function-bindings.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>loqa-voice-dsp spectral analysis exposed via FFI/JNI</iWant>
+    <soThat>iOS and Android can compute spectral features</soThat>
+    <tasks>
+- Create Rust FFI for analyze_spectrum_rust
+- Define SpectrumResult struct (centroid, rolloff, tilt)
+- Implement spectral centroid calculation
+- Implement spectral rolloff calculation
+- Implement spectral tilt calculation
+- Test with various audio types
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust compiled, When exposing spectral, Then exports analyze_spectrum_rust with SpectrumResult struct
+AC2: Given function exposed, When computing, Then computes spectral centroid (brightness in Hz)
+AC3: Given computing, When processing, Then computes spectral rolloff (95% energy threshold frequency)
+AC4: Given computing, When calculating, Then computes spectral tilt (slope of spectrum)
+AC5: Given implementation, When optimizing, Then all spectral features computed in single function call
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Rust FFI</title>
+        <section>Rust FFI/JNI Integration</section>
+        <snippet>Follow FFT and pitch detection patterns. Use #[no_mangle] and extern "C". Return SpectrumResult struct with centroid, rolloff, tilt. Single efficient computation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/prd.md</path>
+        <title>PRD - Spectral Analysis Requirements</title>
+        <section>FR13-FR16 Core DSP Analysis Capabilities</section>
+        <snippet>Spectral analysis: centroid (brightness), rolloff (energy distribution), tilt (spectral slope). Fourth core DSP function completing MVP.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>rust/loqa-voice-dsp/src/spectral.rs</path>
+        <kind>module</kind>
+        <symbol>analyze_spectrum_rust</symbol>
+        <lines>all</lines>
+        <reason>Create FFI function for spectral analysis</reason>
+      </artifact>
+      <artifact>
+        <path>rust/loqa-voice-dsp/src/lib.rs</path>
+        <kind>module</kind>
+        <symbol>lib</symbol>
+        <lines>all</lines>
+        <reason>Export SpectrumResult struct and analyze_spectrum_rust</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <rust>
+        <crate name="loqa-voice-dsp" note="Core DSP library with spectral analysis algorithms" />
+      </rust>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow FFT and pitch detection FFI patterns from Stories 2.1, 3.1, 3.2
+- Use #[no_mangle] and extern "C" for FFI
+- SpectrumResult struct with f32 fields: centroid, rolloff, tilt
+- All three spectral features computed in single pass for efficiency
+- Accept audio buffer pointer, length, sample rate
+- Return SpectrumResult struct by value
+- Spectral centroid: weighted mean of frequencies (brightness measure)
+- Spectral rolloff: frequency below which 95% of energy is concentrated
+- Spectral tilt: slope of spectral envelope (high-pass vs low-pass character)
+- Completes Epic 4 Rust layer - fourth core DSP function
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>analyze_spectrum_rust</name>
+      <kind>Rust FFI function</kind>
+      <signature>
+#[repr(C)]
+pub struct SpectrumResult {
+    pub centroid: f32,    // Spectral centroid in Hz
+    pub rolloff: f32,     // Spectral rolloff frequency in Hz
+    pub tilt: f32,        // Spectral tilt (negative = more low freq)
+}
+
+#[no_mangle]
+pub extern "C" fn analyze_spectrum_rust(
+    audio_ptr: *const f32,
+    length: usize,
+    sample_rate: u32,
+) -> SpectrumResult
+      </signature>
+      <path>rust/loqa-voice-dsp/src/spectral.rs</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with synthetic audio: sine waves (narrow spectral peak), white noise (broad spectrum), pink noise (1/f spectrum). Verify centroid, rolloff, tilt values match expected characteristics.
+    </standards>
+    <locations>
+rust/loqa-voice-dsp/tests/spectral_tests.rs
+    </locations>
+    <ideas>
+- 440 Hz sine: centroid ~440 Hz, rolloff ~440 Hz, tilt ~0 (AC2, AC3, AC4)
+- White noise: centroid mid-range, rolloff high, tilt ~0 (AC2, AC3, AC4)
+- Pink noise: centroid lower, rolloff lower, tilt negative (AC2, AC3, AC4)
+- Verify single function computes all three features (AC5)
+- Test memory safety with various buffer sizes (AC1)
+    </ideas>
+  </tests>
+</story-context>

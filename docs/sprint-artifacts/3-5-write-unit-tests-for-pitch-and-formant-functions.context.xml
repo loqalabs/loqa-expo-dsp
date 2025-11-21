@@ -1,0 +1,97 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>5</storyId>
+    <title>Write Unit Tests for Pitch and Formant Functions</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-5-write-unit-tests-for-pitch-and-formant-functions.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>comprehensive tests for pitch and formant functions</iWant>
+    <soThat>voice analysis is reliable across platforms</soThat>
+    <tasks>
+- Write TypeScript tests for detectPitch
+- Write TypeScript tests for extractFormants
+- Write iOS tests
+- Write Android tests
+- Verify cross-platform consistency
+- All tests pass
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given functions implemented, When writing tests, Then cover valid inputs, validation errors, cross-platform behavior
+AC2: Given valid inputs, When testing pitch, Then detects frequency correctly, returns proper confidence/voiced status
+AC3: Given valid inputs, When testing formants, Then extracts F1/F2/F3 correctly
+AC4: Given native tests, When running, Then iOS XCTest and Android JUnit validate bindings
+AC5: Given all tests, When executed, Then pass on TypeScript, iOS, and Android
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Testing</title>
+        <section>Testing & Quality Tools</section>
+        <snippet>Follow computeFFT testing pattern. Synthetic tones for pitch. Vowel recordings for formants. Cross-platform consistency critical.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/detectPitch.ts</path>
+        <kind>module</kind>
+        <symbol>detectPitch</symbol>
+        <lines>all</lines>
+        <reason>Function under test</reason>
+      </artifact>
+      <artifact>
+        <path>src/extractFormants.ts</path>
+        <kind>module</kind>
+        <symbol>extractFormants</symbol>
+        <lines>all</lines>
+        <reason>Function under test</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="jest" version="^29.0.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT test pattern from Story 2.6
+- Synthetic 440 Hz tone for pitch tests
+- Vowel recordings for formant tests
+- Verify cross-platform consistency
+- Depends on Story 3.4 (TypeScript APIs)
+  </constraints>
+
+  <interfaces>
+<!-- No new interfaces - testing existing functions -->
+  </interfaces>
+
+  <tests>
+    <standards>
+440 Hz tone: verify pitch ~440 Hz. Silence: verify is_voiced=false. Vowels: verify F1/F2/F3 in expected ranges. iOS and Android produce identical results.
+    </standards>
+    <locations>
+__tests__/detectPitch.test.ts
+__tests__/extractFormants.test.ts
+ios/Tests/PitchDetectionTests.swift
+ios/Tests/FormantExtractionTests.swift
+android/src/test/.../PitchDetectionTests.kt
+android/src/test/.../FormantExtractionTests.kt
+    </locations>
+    <ideas>
+- 440 Hz tone: pitch ~440 Hz, confidence &gt; 0.8, is_voiced=true (AC2)
+- Silence: is_voiced=false, frequency=0.0 (AC2)
+- /a/ vowel: F1 ~700 Hz, F2 ~1200 Hz (AC3)
+- Compare iOS and Android results for same input (AC5)
+    </ideas>
+  </tests>
+</story-context>

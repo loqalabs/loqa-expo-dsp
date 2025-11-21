@@ -1,0 +1,21 @@
+{
+  "name": "loqa-audio-dsp-example",
+  "version": "0.1.0",
+  "private": true,
+  "main": "node_modules/expo/AppEntry.js",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web"
+  },
+  "dependencies": {
+    "@loqalabs/loqa-audio-dsp": "file:../",
+    "expo": "^54.0.0",
+    "react": "^19.2.0",
+    "react-native": "0.81.5"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.20.0"
+  }
+}

@@ -1,0 +1,9 @@
+{
+  "platforms": ["ios", "android"],
+  "ios": {
+    "modules": ["LoqaAudioDspModule"]
+  },
+  "android": {
+    "modules": ["com.loqalabs.loquaaudiodsp.LoqaAudioDspModule"]
+  }
+}

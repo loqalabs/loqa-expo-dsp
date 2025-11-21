@@ -1,0 +1,133 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>5</storyId>
+    <title>Implement TypeScript computeFFT API Function</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-5-implement-typescript-computefft-api-function.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>a clean TypeScript computeFFT API</iWant>
+    <soThat>users have a typed, validated interface to FFT analysis</soThat>
+    <tasks>
+- Create src/computeFFT.ts
+- Implement input validation
+- Extract and validate options (fftSize, windowType, sampleRate)
+- Call LoqaAudioDspModule.computeFFT
+- Convert result to FFTResult type
+- Wrap errors in NativeModuleError
+- Add debug logging
+- Export from src/index.ts
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given native and validation exist, When I implement src/computeFFT.ts, Then function signature matches specification
+AC2: Given function called, When validating, Then validates audioBuffer using validateAudioBuffer()
+AC3: Given validation passes, When processing, Then extracts fftSize, windowType with defaults
+AC4: Given ready to call native, When marshalling, Then converts Float32Array to number[] for bridge
+AC5: Given native returns, When processing result, Then converts to FFTResult with Float32Array
+AC6: Given errors occur, When caught, Then wraps native errors in NativeModuleError with context
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - TypeScript API</title>
+        <section>API Contracts - TypeScript Public API</section>
+        <snippet>computeFFT accepts Float32Array or number[], returns Promise&lt;FFTResult&gt;. Validate inputs with validateAudioBuffer, validateFFTSize. Extract options with defaults: fftSize=buffer.length, windowType='hanning', sampleRate=44100. Convert to number[] for React Native bridge. Return FFTResult with Float32Array.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/LoqaAudioDspModule.ts</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Native module from Story 1.5</reason>
+      </artifact>
+      <artifact>
+        <path>src/validation.ts</path>
+        <kind>module</kind>
+        <symbol>validation</symbol>
+        <lines>all</lines>
+        <reason>Validation functions from Story 2.4</reason>
+      </artifact>
+      <artifact>
+        <path>src/types.ts</path>
+        <kind>module</kind>
+        <symbol>FFTOptions, FFTResult</symbol>
+        <lines>all</lines>
+        <reason>Type definitions from Story 1.5</reason>
+      </artifact>
+      <artifact>
+        <path>src/errors.ts</path>
+        <kind>module</kind>
+        <symbol>NativeModuleError</symbol>
+        <lines>all</lines>
+        <reason>Error classes from Story 1.5</reason>
+      </artifact>
+      <artifact>
+        <path>src/utils.ts</path>
+        <kind>module</kind>
+        <symbol>logDebug</symbol>
+        <lines>all</lines>
+        <reason>Logging utilities from Story 1.5</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo-modules-core" version="*" type="peer" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Accept Float32Array or number[]
+- Validate buffer before native call
+- Defaults: fftSize=buffer.length, windowType='hanning', sampleRate=44100
+- Convert Float32Array to number[] for React Native bridge
+- Return FFTResult with Float32Array (not number[])
+- Wrap native errors in NativeModuleError
+- Add debug logging for development
+- Depends on Stories 1.5, 2.2, 2.3, 2.4
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>computeFFT</name>
+      <kind>TypeScript async function</kind>
+      <signature>
+export async function computeFFT(
+  audioBuffer: Float32Array | number[],
+  options?: FFTOptions
+): Promise&lt;FFTResult&gt; {
+  // Implementation
+}
+      </signature>
+      <path>src/computeFFT.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Manual testing with example app for this story. Full unit tests in Story 2.6. Verify TypeScript compilation. Test basic functionality with sine wave.
+    </standards>
+    <locations>
+Manual testing - comprehensive tests in Story 2.6
+    </locations>
+    <ideas>
+- Test with Float32Array input (AC1, AC4)
+- Test with number[] input (AC1, AC4)
+- Verify validation called (AC2)
+- Verify defaults applied (AC3)
+- Verify FFTResult has Float32Array (AC5)
+- Test error wrapping (AC6)
+    </ideas>
+  </tests>
+</story-context>

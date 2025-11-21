@@ -1,0 +1,106 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>3</storyId>
+    <title>Implement Android computeFFT Native Function</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-3-implement-android-computefft-native-function.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>computeFFT working on Android</iWant>
+    <soThat>Android apps can perform frequency analysis</soThat>
+    <tasks>
+- Update LoqaAudioDspModule.kt with computeFFT
+- Implement input validation (buffer, fftSize)
+- Call RustBridge.computeFFT via JNI
+- Build frequencies array
+- Return result map
+- Implement error handling with Promise.reject
+- Test on Android device/emulator
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust FFT bindings exist, When I implement Kotlin computeFFT, Then LoqaAudioDspModule.kt exposes async function with proper signature
+AC2: Given the function is implemented, When I validate inputs, Then validates buffer not empty, fftSize power of 2, range 256-8192
+AC3: Given inputs valid, When I call Rust, Then calls RustBridge.computeFFT(buffer, fftSize, windowType)
+AC4: Given Rust returns, When I process results, Then JNI handles FloatArray marshalling automatically
+AC5: Given computation completes, When I return, Then returns map with "magnitude" and "frequencies"
+AC6: Given errors occur, When handled, Then catches exceptions and rejects Promise with error code and message
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Android Kotlin JNI</title>
+        <section>Integration Points - Android (Kotlin JNI)</section>
+        <snippet>JNI handles FloatArray marshalling automatically. Use GlobalScope.launch(Dispatchers.Default) for async. Wrap in try-catch with Promise.reject for errors. Window type mapping same as iOS.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Replace placeholder computeFFT with actual implementation</reason>
+      </artifact>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/RustJNI/RustBridge.kt</path>
+        <kind>bridge</kind>
+        <symbol>RustBridge</symbol>
+        <lines>all</lines>
+        <reason>Add JNI external declarations for Rust FFT functions</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <android>
+        <library name="libloqua_voice_dsp.so" path="android/src/main/jniLibs/" note="Rust FFT library from Story 2.1" />
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- JNI handles FloatArray marshalling automatically
+- Use GlobalScope.launch(Dispatchers.Default) for async
+- All native calls wrapped in try-catch
+- Promise.reject for errors with codes: VALIDATION_ERROR, FFT_ERROR
+- Mirror iOS behavior for cross-platform consistency
+- Depends on Story 2.1 (Rust FFT) and Story 1.4 (Kotlin JNI scaffold)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>computeFFT Expo Function</name>
+      <kind>Kotlin Expo AsyncFunction</kind>
+      <signature>
+AsyncFunction("computeFFT") { buffer: FloatArray, options: Map&lt;String, Any&gt; -&gt;
+    // Implementation with JNI call to Rust
+    // Returns map of "magnitude" and "frequencies"
+}
+      </signature>
+      <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with sine wave like iOS. Verify results match iOS output for same input (cross-platform consistency). Test validation errors. Verify no memory leaks with Android Profiler.
+    </standards>
+    <locations>
+Manual testing with example app
+android/src/test/.../FFTTests.kt (formal tests in Story 2.6)
+    </locations>
+    <ideas>
+- Use identical test sine wave as iOS, verify matching results (AC1-AC5)
+- Test all validation cases matching iOS (AC2, AC6)
+- Verify JNI handles FloatArray correctly (AC4)
+- Test Promise rejection for errors (AC6)
+    </ideas>
+  </tests>
+</story-context>

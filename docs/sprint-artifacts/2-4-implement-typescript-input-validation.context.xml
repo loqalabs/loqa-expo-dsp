@@ -1,0 +1,125 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>4</storyId>
+    <title>Implement TypeScript Input Validation</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-4-implement-typescript-input-validation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>comprehensive input validation</iWant>
+    <soThat>invalid inputs are caught early with clear error messages</soThat>
+    <tasks>
+- Implement validateAudioBuffer (null, empty, NaN, Infinity, max size checks)
+- Implement validateSampleRate (integer, 8000-48000 Hz)
+- Implement validateFFTSize (integer, power of 2, 256-8192)
+- Write unit tests in __tests__/validation.test.ts
+- Verify all tests pass
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given validation.ts exists, When I implement functions, Then validateAudioBuffer, validateSampleRate, validateFFTSize implemented
+AC2: Given validateAudioBuffer called, When buffer invalid, Then throws ValidationError with details
+AC3: Given validateSampleRate called, When rate invalid, Then throws ValidationError with range info
+AC4: Given validateFFTSize called, When not power of 2, Then throws ValidationError
+AC5: Given errors thrown, When caught, Then includes invalid value and expected range
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Input Validation</title>
+        <section>Security Architecture - Input Validation</section>
+        <snippet>Validate all inputs in TypeScript layer before native calls. Check: buffer not null/empty, no NaN/Infinity, max 16384 samples. Sample rate: integer, 8000-48000 Hz. FFT size: integer, power of 2, 256-8192. Throw ValidationError with details.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/validation.ts</path>
+        <kind>module</kind>
+        <symbol>validation</symbol>
+        <lines>all</lines>
+        <reason>Implement validation functions from placeholder signatures</reason>
+      </artifact>
+      <artifact>
+        <path>src/errors.ts</path>
+        <kind>module</kind>
+        <symbol>ValidationError</symbol>
+        <lines>all</lines>
+        <reason>ValidationError class created in Story 1.5</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="typescript" version="^5.3.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Fail fast: validate before native calls
+- Buffer max size: 16384 samples
+- Sample rate range: 8000-48000 Hz (integer)
+- FFT size: power of 2, 256-8192
+- Power-of-2 check: (n &amp; (n - 1)) === 0 &amp;&amp; n &gt; 0
+- Throw ValidationError with code, message, details
+- Depends on Story 1.5 (ValidationError class exists)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>validateAudioBuffer</name>
+      <kind>TypeScript function</kind>
+      <signature>
+export function validateAudioBuffer(buffer: Float32Array | number[]): void {
+  // Throws ValidationError if invalid
+}
+      </signature>
+      <path>src/validation.ts</path>
+    </interface>
+    <interface>
+      <name>validateSampleRate</name>
+      <kind>TypeScript function</kind>
+      <signature>
+export function validateSampleRate(sampleRate: number): void {
+  // Throws ValidationError if invalid
+}
+      </signature>
+      <path>src/validation.ts</path>
+    </interface>
+    <interface>
+      <name>validateFFTSize</name>
+      <kind>TypeScript function</kind>
+      <signature>
+export function validateFFTSize(fftSize: number): void {
+  // Throws ValidationError if invalid
+}
+      </signature>
+      <path>src/validation.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Write Jest unit tests for each validation function. Test valid inputs pass without error. Test invalid inputs throw ValidationError with correct details. Verify error messages are descriptive.
+    </standards>
+    <locations>
+__tests__/validation.test.ts (created in this story)
+    </locations>
+    <ideas>
+- Test validateAudioBuffer: null, empty, NaN, Infinity, &gt;16384 throws (AC2, AC5)
+- Test validateAudioBuffer: valid Float32Array and number[] pass (AC1)
+- Test validateSampleRate: non-integer, &lt;8000, &gt;48000 throws (AC3, AC5)
+- Test validateSampleRate: 44100 passes (AC1)
+- Test validateFFTSize: non-power-of-2 throws (AC4, AC5)
+- Test validateFFTSize: 512 passes, 500 throws (AC1, AC4)
+- Verify error details include bufferLength, sampleRate, fftSize values (AC5)
+    </ideas>
+  </tests>
+</story-context>

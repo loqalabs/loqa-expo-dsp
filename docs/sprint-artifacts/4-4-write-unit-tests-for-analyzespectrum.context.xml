@@ -1,0 +1,90 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>4</epicId>
+    <storyId>4</storyId>
+    <title>Write Unit Tests for analyzeSpectrum</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/4-4-write-unit-tests-for-analyzespectrum.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>comprehensive tests for spectral analysis</iWant>
+    <soThat>analyzeSpectrum is reliable</soThat>
+    <tasks>
+- Write __tests__/analyzeSpectrum.test.ts
+- Write iOS spectral analysis tests
+- Write Android spectral analysis tests
+- Use synthetic audio with known spectral characteristics
+- Run all tests and verify they pass
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given analyzeSpectrum implemented, When writing tests, Then test cases include computing features successfully
+AC2: Given tests, When running, Then returns centroid, rolloff, tilt in expected ranges
+AC3: Given validation, When testing, Then validates sample rate
+AC4: Given buffer sizes, When testing, Then handles various buffer sizes
+AC5: Given all tests, When executed, Then pass on TypeScript, iOS, and Android
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Testing</title>
+        <section>Testing &amp; Quality Tools</section>
+        <snippet>Follow computeFFT and pitch/formant testing patterns. Synthetic audio with known spectral characteristics: sine waves (narrow peak), white noise (broad spectrum), pink noise (1/f spectrum). Cross-platform consistency critical.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/analyzeSpectrum.ts</path>
+        <kind>module</kind>
+        <symbol>analyzeSpectrum</symbol>
+        <lines>all</lines>
+        <reason>Function under test</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="jest" version="^29.0.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow computeFFT test pattern from Story 2.6
+- Follow pitch/formant test pattern from Story 3.5
+- Sine wave: narrow spectral peak at known frequency
+- White noise: broad spectrum, mid-range centroid
+- Pink noise: 1/f spectrum, lower centroid, negative tilt
+- Verify cross-platform consistency
+- Depends on Story 4.3 (TypeScript API)
+  </constraints>
+
+  <interfaces>
+<!-- No new interfaces - testing existing functions -->
+  </interfaces>
+
+  <tests>
+    <standards>
+440 Hz sine: centroid ~440 Hz, rolloff ~440 Hz, tilt ~0. White noise: centroid mid-range, rolloff high. Pink noise: centroid lower, tilt negative. iOS and Android produce identical results.
+    </standards>
+    <locations>
+__tests__/analyzeSpectrum.test.ts
+ios/Tests/SpectralAnalysisTests.swift
+android/src/test/.../SpectralAnalysisTests.kt
+    </locations>
+    <ideas>
+- 440 Hz sine: centroid ~440 Hz, rolloff ~440 Hz, tilt ~0 (AC2)
+- White noise: centroid 4000-8000 Hz range, rolloff high (AC2)
+- Pink noise: centroid &lt; white noise, tilt &lt; 0 (AC2)
+- Compare iOS and Android results for same input (AC5)
+- Test various buffer sizes (512, 1024, 2048) (AC4)
+- Test invalid sample rates (AC3)
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,115 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>6</storyId>
+    <title>Write Unit Tests for computeFFT</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-6-write-unit-tests-for-computefft.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>comprehensive tests for computeFFT</iWant>
+    <soThat>the function is reliable across platforms</soThat>
+    <tasks>
+- Write TypeScript tests in __tests__/computeFFT.test.ts (valid inputs, validation errors)
+- Write iOS tests in ios/Tests/FFTTests.swift (native FFT validation)
+- Write Android tests in android/src/test/.../FFTTests.kt (JNI validation)
+- Use mock sine wave data for predictable results
+- Run npm test, iOS tests, Android tests
+- Verify all tests pass
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given computeFFT implemented, When writing tests, Then test cases cover valid inputs, validation errors, cross-platform behavior
+AC2: Given valid inputs, When testing, Then computes FFT correctly, returns proper magnitude/frequencies, accepts Float32Array and number[]
+AC3: Given invalid inputs, When testing, Then throws ValidationError for empty buffer, large buffer, NaN, non-power-of-2
+AC4: Given native tests, When running, Then iOS XCTest and Android JUnit validate FFI/JNI bindings
+AC5: Given all tests, When executed, Then pass on TypeScript, iOS, and Android
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Testing Strategy</title>
+        <section>Testing & Quality Tools</section>
+        <snippet>Jest for TypeScript, XCTest for iOS, JUnit for Android. Test valid inputs with synthetic sine waves. Test validation errors. Test cross-platform consistency. All tests must pass before merging.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/computeFFT.ts</path>
+        <kind>module</kind>
+        <symbol>computeFFT</symbol>
+        <lines>all</lines>
+        <reason>Function under test from Story 2.5</reason>
+      </artifact>
+      <artifact>
+        <path>ios/LoqaAudioDspModule.swift</path>
+        <kind>module</kind>
+        <symbol>computeFFT</symbol>
+        <lines>all</lines>
+        <reason>iOS implementation from Story 2.2</reason>
+      </artifact>
+      <artifact>
+        <path>android/src/main/java/com/loqalabs/loquaaudiodsp/LoqaAudioDspModule.kt</path>
+        <kind>module</kind>
+        <symbol>computeFFT</symbol>
+        <lines>all</lines>
+        <reason>Android implementation from Story 2.3</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="jest" version="^29.0.0" type="dev" />
+        <package name="ts-jest" version="latest" type="dev" />
+      </javascript>
+      <ios>
+        <framework name="XCTest" />
+      </ios>
+      <android>
+        <package name="junit" version="4.13+" type="test" />
+      </android>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Use synthetic sine wave: 440 Hz at 44100 Hz sample rate
+- Verify FFT peak appears at expected bin
+- Test all window types produce different results
+- Test cross-platform consistency (iOS and Android match)
+- Depends on Stories 1.6 (test infrastructure), 2.5 (computeFFT)
+  </constraints>
+
+  <interfaces>
+<!-- No new interfaces - testing existing functions -->
+  </interfaces>
+
+  <tests>
+    <standards>
+Create synthetic 440 Hz sine wave. Compute FFT. Verify magnitude peak at bin ~440 Hz. Test Float32Array and number[] inputs. Test validation errors. Verify iOS and Android produce identical results for same input.
+    </standards>
+    <locations>
+__tests__/computeFFT.test.ts (TypeScript tests)
+ios/Tests/FFTTests.swift (iOS native tests)
+android/src/test/.../FFTTests.kt (Android native tests)
+    </locations>
+    <ideas>
+- Generate 440 Hz sine wave, verify peak near bin 440 (AC1, AC2)
+- Test with Float32Array input (AC2)
+- Test with number[] input (AC2)
+- Test all window types (hanning, hamming, blackman, none) (AC2)
+- Test empty buffer throws ValidationError (AC3)
+- Test buffer &gt;16384 throws ValidationError (AC3)
+- Test NaN in buffer throws ValidationError (AC3)
+- Test non-power-of-2 fftSize throws ValidationError (AC3)
+- iOS: Test FFI memory management with XCTest (AC4)
+- Android: Test JNI calls with JUnit (AC4)
+- Compare iOS and Android results for same input (AC5)
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,185 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>1</storyId>
+    <title>Implement FFT Rust Function Bindings</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-1-implement-fft-rust-function-bindings.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>the loqa-voice-dsp FFT function exposed via FFI/JNI</iWant>
+    <soThat>iOS and Android can call Rust FFT computation</soThat>
+    <tasks>
+- Create Rust FFI wrapper module
+  - Create rust/src/lib.rs or ffi.rs for FFI exports
+  - Import FFT function from loqa-voice-dsp crate
+  - Add #[no_mangle] attribute to prevent name mangling
+  - Add extern "C" for C ABI compatibility
+  - Define compute_fft_rust function signature
+  - Define free_fft_result_rust function signature
+- Implement compute_fft_rust
+  - Accept buffer as *const f32 pointer
+  - Accept length as i32
+  - Accept fft_size as i32
+  - Accept window_type as i32 (0=none, 1=hanning, 2=hamming, 3=blackman)
+  - Convert raw pointer to Rust slice
+  - Validate fft_size is power of 2
+  - Call loqa-voice-dsp FFT function with appropriate window
+  - Return magnitude spectrum (length = fft_size / 2)
+  - Convert Result Vec&lt;f32&gt; to raw pointer: Box::into_raw(vec.into_boxed_slice())
+  - Return pointer for FFI
+- Implement free_fft_result_rust
+  - Accept *mut f32 pointer
+  - Convert back to Box&lt;[f32]&gt;
+  - Drop/deallocate the box
+  - Ensure no double-free issues
+- Add input validation
+  - Validate buffer pointer is not null
+  - Validate length &gt; 0
+  - Validate fft_size is power of 2: (n &amp; (n - 1)) == 0
+  - Validate fft_size &gt;= 256 and &lt;= 8192
+  - Validate window_type is in valid range (0-3)
+  - Return null pointer on validation failure
+- Test Rust FFI bindings
+  - Write Rust unit tests for compute_fft_rust
+  - Test with various buffer sizes
+  - Test power-of-2 validation
+  - Test window type parameter
+  - Verify memory is properly allocated/freed
+  - Run cargo test successfully
+- Build and verify libraries
+  - Run build-ios.sh to compile for iOS
+  - Run build-android.sh to compile for Android
+  - Verify libraries are created in correct locations
+  - Verify FFI symbols are exported (nm command)
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given the Rust loqa-voice-dsp crate is compiled, When I expose FFT functions for FFI/JNI, Then Rust exports the following C-compatible functions: compute_fft_rust(buffer: *const f32, length: i32, fft_size: i32, window_type: i32) -&gt; *mut f32, free_fft_result_rust(ptr: *mut f32), Functions use #[no_mangle] and extern "C" for C ABI compatibility
+
+AC2: Given FFT functions are exposed, When I check the function parameters, Then FFT function accepts window type parameter (0=none, 1=hanning, 2=hamming, 3=blackman)
+
+AC3: Given FFT computation completes, When I examine the result, Then FFT result is heap-allocated Rust Vec converted to raw pointer for FFI
+
+AC4: Given FFI functions are exported, When I review memory management, Then calling code must call free function to prevent memory leaks
+
+AC5: Given FFT parameters are provided, When I validate inputs, Then FFT size is validated to be power of 2 in Rust code
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Rust FFI/JNI Integration</title>
+        <section>Integration Points - Rust FFI Pattern</section>
+        <snippet>Use #[no_mangle] and extern "C" for FFI exports. Accept raw pointers (*const f32, *mut f32). Convert to/from Rust slices safely with unsafe blocks. Validate inputs and return null on failure. Heap-allocate results with Box::into_raw. Provide free function for memory cleanup.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Memory Management</title>
+        <section>Memory Management at FFI/JNI Boundary</section>
+        <snippet>Critical pattern: Rust allocates → Returns raw pointer → Swift/Kotlin copies → Swift/Kotlin frees Rust memory immediately. Use Box::into_raw for heap allocation. Provide corresponding free function. Never return stack-allocated data.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - DSP Core</title>
+        <section>DSP Core - loqa-voice-dsp</section>
+        <snippet>loqa-voice-dsp crate provides battle-tested FFT, YIN pitch detection, LPC formants, and spectral analysis. Compile with --release and LTO for &lt;5ms performance target. Use standard window functions: Hanning, Hamming, Blackman, or None.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>rust/Cargo.toml</path>
+        <kind>configuration</kind>
+        <symbol>Cargo.toml</symbol>
+        <lines>all</lines>
+        <reason>Must include loqa-voice-dsp dependency</reason>
+      </artifact>
+      <artifact>
+        <path>rust/build-ios.sh</path>
+        <kind>script</kind>
+        <symbol>build-ios.sh</symbol>
+        <lines>all</lines>
+        <reason>Build script from Story 1.2 - use to compile Rust library</reason>
+      </artifact>
+      <artifact>
+        <path>rust/build-android.sh</path>
+        <kind>script</kind>
+        <symbol>build-android.sh</symbol>
+        <lines>all</lines>
+        <reason>Build script from Story 1.2 - use to compile Rust library</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <rust>
+        <crate name="loqa-voice-dsp" version="0.x" note="External DSP crate with FFT implementation" />
+      </rust>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CRITICAL: Use #[no_mangle] and extern "C" for all FFI exports
+- Window type encoding: 0=none, 1=hanning, 2=hamming, 3=blackman
+- FFT size must be power of 2, validated in Rust: (n &amp; (n - 1)) == 0
+- FFT size range: 256 to 8192
+- Return magnitude spectrum only (length = fft_size / 2)
+- Return null pointer on validation failures
+- Heap-allocate results with Box::into_raw
+- Provide free_fft_result_rust for memory cleanup
+- Compile with --release and LTO for performance
+- Depends on Story 1.2 (Rust build infrastructure)
+- Prepares for Story 2.2 (iOS) and Story 2.3 (Android)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>compute_fft_rust</name>
+      <kind>Rust FFI function</kind>
+      <signature>
+#[no_mangle]
+pub extern "C" fn compute_fft_rust(
+    buffer: *const f32,
+    length: i32,
+    fft_size: i32,
+    window_type: i32
+) -&gt; *mut f32
+      </signature>
+      <path>rust/src/lib.rs</path>
+    </interface>
+    <interface>
+      <name>free_fft_result_rust</name>
+      <kind>Rust FFI function</kind>
+      <signature>
+#[no_mangle]
+pub extern "C" fn free_fft_result_rust(ptr: *mut f32)
+      </signature>
+      <path>rust/src/lib.rs</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Write Rust unit tests with #[test] attribute. Test valid inputs with known FFT results. Test validation: null pointer, invalid length, non-power-of-2, out-of-range values. Verify no panics on invalid input. Use cargo test to run. Verify library symbols with nm command.
+    </standards>
+    <locations>
+rust/src/lib.rs (inline tests)
+OR rust/tests/ directory
+    </locations>
+    <ideas>
+- Test compute_fft_rust with sine wave, verify peak at expected frequency (AC1, AC2)
+- Test all window types (0, 1, 2, 3) produce different results (AC2)
+- Test result length equals fft_size / 2 (AC3)
+- Test null pointer input returns null (AC5)
+- Test non-power-of-2 fft_size returns null (AC5)
+- Test fft_size out of range returns null (AC5)
+- Test free_fft_result_rust doesn't crash (AC4)
+- Verify compiled libraries exist after build scripts run
+- Use nm command to verify exported symbols: nm -g libloqua_voice_dsp.a | grep compute_fft_rust
+    </ideas>
+  </tests>
+</story-context>

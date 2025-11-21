@@ -1,0 +1,108 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>3</epicId>
+    <storyId>2</storyId>
+    <title>Implement Formant Extraction Rust Function Bindings</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/3-2-implement-formant-extraction-rust-function-bindings.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>loqa-voice-dsp LPC formant extraction exposed via FFI/JNI</iWant>
+    <soThat>iOS and Android can extract formants from audio buffers</soThat>
+    <tasks>
+- Create Rust FFI for extract_formants_rust
+- Define FormantsResult struct (f1, f2, f3, bandwidths)
+- Implement LPC analysis call
+- Add input validation for voiced audio
+- Set default LPC order
+- Test with vowel samples
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust compiled, When exposing LPC, Then exports extract_formants_rust with FormantsResult struct
+AC2: Given function exposed, When calling, Then uses LPC analysis from loqa-voice-dsp
+AC3: Given processing, When validating, Then validates audio appropriate for formant analysis
+AC4: Given defaults, When not specified, Then default LPC order is (sample_rate / 1000) + 2
+AC5: Given result, When returning, Then returns formant frequencies in Hz
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - DSP Core</title>
+        <section>DSP Core - loqa-voice-dsp</section>
+        <snippet>LPC (Linear Predictive Coding) for formant extraction. Returns F1, F2, F3 frequencies and bandwidths. Default LPC order: (sample_rate / 1000) + 2. Best for voiced speech segments.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>rust/src/lib.rs</path>
+        <kind>module</kind>
+        <symbol>lib</symbol>
+        <lines>all</lines>
+        <reason>Add formant extraction FFI following pitch detection pattern</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <rust>
+        <crate name="loqa-voice-dsp" version="0.x" note="LPC formant extraction" />
+      </rust>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Follow pitch detection FFI pattern from Story 3.1
+- LPC analysis algorithm (not other formant methods)
+- Default LPC order: (sample_rate / 1000) + 2
+- Return struct: f1, f2, f3 (f32), bandwidths for each
+- Best results with voiced audio
+- Depends on Story 3.1 (pitch pattern established)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>extract_formants_rust</name>
+      <kind>Rust FFI function</kind>
+      <signature>
+#[no_mangle]
+pub extern "C" fn extract_formants_rust(
+    buffer: *const f32,
+    length: i32,
+    sample_rate: i32,
+    lpc_order: i32
+) -&gt; FormantsResult
+
+#[repr(C)]
+pub struct FormantsResult {
+    pub f1: f32,
+    pub f2: f32,
+    pub f3: f32,
+    pub bw1: f32,
+    pub bw2: f32,
+    pub bw3: f32
+}
+      </signature>
+      <path>rust/src/lib.rs</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with vowel recordings. Verify F1, F2, F3 in expected ranges. Test LPC order defaults. Follow testing pattern from Stories 2.1 and 3.1.
+    </standards>
+    <locations>
+rust/src/lib.rs (inline tests) OR rust/tests/
+    </locations>
+    <ideas>
+- Test /a/ vowel, verify F1 ~700 Hz, F2 ~1200 Hz (AC1, AC2, AC5)
+- Test default LPC order: 44100 Hz → order 46 (AC4)
+- Test with voiced audio produces valid formants (AC3)
+    </ideas>
+  </tests>
+</story-context>

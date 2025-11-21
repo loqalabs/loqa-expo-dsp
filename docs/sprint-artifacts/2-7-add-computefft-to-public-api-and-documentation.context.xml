@@ -1,0 +1,112 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>7</storyId>
+    <title>Add computeFFT to Public API and Documentation</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-7-add-computefft-to-public-api-and-documentation.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>computeFFT exported and documented</iWant>
+    <soThat>users can discover and use the function</soThat>
+    <tasks>
+- Export computeFFT from src/index.ts
+- Export FFTOptions and FFTResult types
+- Add comprehensive JSDoc comments
+- Verify TypeScript .d.ts generation
+- Update README.md with FFT example
+- Run TypeScript compilation
+- Verify exports work correctly
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given computeFFT complete, When updating API, Then src/index.ts exports computeFFT, FFTOptions, FFTResult
+AC2: Given exports added, When checking docs, Then all have JSDoc comments with description, parameters, return type, examples, @throws
+AC3: Given TypeScript compiles, When checking output, Then produces correct .d.ts type definitions
+AC4: Given documentation, When updating README, Then includes basic computeFFT usage example
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Public API</title>
+        <section>API Contracts - Module Exports</section>
+        <snippet>Export computeFFT function. Export FFTOptions, FFTResult types. Include comprehensive JSDoc with @param, @returns, @throws, @example. Generate .d.ts for TypeScript autocomplete.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>src/index.ts</path>
+        <kind>module</kind>
+        <symbol>index</symbol>
+        <lines>all</lines>
+        <reason>Add computeFFT exports to public API</reason>
+      </artifact>
+      <artifact>
+        <path>src/computeFFT.ts</path>
+        <kind>module</kind>
+        <symbol>computeFFT</symbol>
+        <lines>all</lines>
+        <reason>Add JSDoc comments</reason>
+      </artifact>
+      <artifact>
+        <path>README.md</path>
+        <kind>documentation</kind>
+        <symbol>README</symbol>
+        <lines>all</lines>
+        <reason>Add computeFFT usage example</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="typescript" version="^5.3.0" type="dev" />
+        <package name="typedoc" version="latest" type="dev" note="Optional for API doc generation" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- JSDoc must include @param, @returns, @throws, @example
+- README example should be minimal but functional
+- Verify .d.ts files generated correctly
+- TypeScript compilation must pass
+- Depends on Story 2.6 (tests passing)
+- Completes Epic 2 - first DSP function fully available
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Public API Export</name>
+      <kind>TypeScript module exports</kind>
+      <signature>
+// src/index.ts
+export { computeFFT } from './computeFFT';
+export type { FFTOptions, FFTResult } from './types';
+      </signature>
+      <path>src/index.ts</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify TypeScript compilation with tsc. Check lib/ directory has .d.ts files. Test import in example app. Verify JSDoc appears in IDE autocomplete. Review README example for clarity.
+    </standards>
+    <locations>
+Verification via TypeScript compilation and manual testing
+    </locations>
+    <ideas>
+- Run tsc and verify no errors (AC3)
+- Check lib/index.d.ts exists and exports computeFFT (AC1, AC3)
+- Import in example app and verify autocomplete works (AC2, AC3)
+- Verify JSDoc appears in IDE tooltip (AC2)
+- Test README example code actually works (AC4)
+- Verify @throws documented (AC2)
+    </ideas>
+  </tests>
+</story-context>

@@ -1,0 +1,169 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>3</storyId>
+    <title>Implement iOS Swift FFI Bindings Scaffold</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-3-implement-ios-swift-ffi-bindings-scaffold.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>Swift FFI bindings to Rust DSP functions</iWant>
+    <soThat>iOS can call Rust loqa-voice-dsp functions safely</soThat>
+    <tasks>
+- Create RustBridge.swift
+  - Create ios/RustFFI/RustBridge.swift file
+  - Add FFI function declarations using @_silgen_name
+  - Implement placeholder Swift wrapper for FFT (will be completed in Epic 2)
+  - Use UnsafePointer&lt;Float&gt; for buffer passing
+  - Implement defer blocks for memory cleanup
+  - Add error handling for FFI call failures
+  - Document memory management patterns
+- Update LoqaAudioDspModule.swift
+  - Import RustBridge
+  - Implement Expo Module Definition protocol
+  - Add placeholder async function stubs for: computeFFT, detectPitch, extractFormants, analyzeSpectrum
+  - Use proper async/Promise patterns
+  - Add basic error handling structure
+- Implement memory safety patterns
+  - Use defer blocks to guarantee Rust memory is freed
+  - Use UnsafeBufferPointer for zero-copy where possible
+  - Ensure all FFI calls have corresponding free functions
+  - Document: Copy data from Rust → Swift, then immediately free Rust memory
+  - Follow patterns from Architecture document
+- Verify iOS build integration
+  - Ensure RustBridge.swift compiles without errors
+  - Verify Podspec includes RustBridge.swift
+  - Test that module initializes successfully
+  - Confirm no memory leaks with placeholder functions
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust libraries are compiled for iOS, When I create Swift FFI bridge code, Then ios/RustFFI/RustBridge.swift is created with: FFI function declarations using @_silgen_name for Rust functions, Swift wrapper functions that handle memory marshalling, Proper use of UnsafePointer for array passing, defer blocks to guarantee Rust memory deallocation, Error handling for FFI failures
+
+AC2: Given Swift FFI bridge exists, When I update LoqaAudioDspModule.swift, Then it implements Expo Module Definition protocol
+
+AC3: Given the module is configured, When I check the module exports, Then it exposes placeholder async functions for future DSP operations
+
+AC4: Given FFI bindings are implemented, When I review memory management, Then memory safety patterns prevent leaks at FFI boundary (as per Architecture)
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Memory Management at FFI Boundary</title>
+        <section>Memory Management at FFI/JNI Boundary</section>
+        <snippet>Critical pattern for iOS: Use defer blocks to guarantee Rust memory is freed. Use UnsafeBufferPointer for zero-copy where possible. Never hold references to Rust-allocated memory beyond function scope. Always copy data from Rust → Swift before freeing. Pattern: Call Rust → Copy result → Free Rust memory with defer.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - iOS Swift FFI Integration</title>
+        <section>Integration Points - iOS (Swift FFI)</section>
+        <snippet>Use @_silgen_name for FFI declarations. Implement wrapper functions that marshal Swift arrays to UnsafePointer for Rust. Use defer blocks for guaranteed memory cleanup. All FFI calls must have corresponding free functions. Follow memory safety pattern from reference implementation.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Native Module Interface</title>
+        <section>Native Module Interface - iOS</section>
+        <snippet>Implement Expo Module Definition protocol using @objc decorator. Use AsyncFunction for Promise-based API. Process on background thread with DispatchQueue.global(qos: .userInitiated). Return dictionaries for complex results.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>ios/LoqaAudioDspModule.swift</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Needs implementation of Expo Module Definition with placeholder async functions</reason>
+      </artifact>
+      <artifact>
+        <path>ios/LoqaAudioDsp.podspec</path>
+        <kind>configuration</kind>
+        <symbol>LoqaAudioDsp.podspec</symbol>
+        <lines>all</lines>
+        <reason>Must verify RustBridge.swift is included in source files</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ios>
+        <framework name="Foundation" />
+        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Compiled Rust library from Story 1.2" />
+      </ios>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CRITICAL: Use defer blocks to guarantee Rust memory is freed (prevents memory leaks)
+- Use UnsafePointer&lt;Float&gt; for buffer passing to Rust
+- All FFI calls must have corresponding free functions
+- Never hold Rust-allocated memory references beyond function scope
+- Copy data from Rust → Swift before freeing Rust memory
+- Process on background thread, never block UI
+- Depends on Story 1.2 (Rust libraries must be compiled)
+- Integrates with Expo module structure from Story 1.1
+- Prepares Swift layer for Epic 2 (actual DSP function implementation)
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>RustBridge (Placeholder FFI)</name>
+      <kind>Swift FFI to Rust</kind>
+      <signature>
+@_silgen_name("placeholder_ffi_function")
+func placeholder_ffi_function() -> UnsafePointer&lt;Float&gt;?
+
+// Wrapper with memory safety
+func placeholderWrapper() -> [Float] {
+    var result: UnsafePointer&lt;Float&gt;? = nil
+    defer {
+        if let ptr = result {
+            free_placeholder_result(ptr)
+        }
+    }
+    // Implementation
+}
+      </signature>
+      <path>ios/RustFFI/RustBridge.swift</path>
+    </interface>
+    <interface>
+      <name>LoqaAudioDsp Expo Module</name>
+      <kind>Expo Module Definition</kind>
+      <signature>
+@objc(LoqaAudioDspModule)
+public class LoqaAudioDspModule: Module {
+    public func definition() -> ModuleDefinition {
+        Name("LoqaAudioDsp")
+        AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any]) -> [String: Any] in
+            // Placeholder implementation
+        }
+        // Additional async functions...
+    }
+}
+      </signature>
+      <path>ios/LoqaAudioDspModule.swift</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Verify Swift compiles without errors. Test module initialization. Confirm placeholder functions can be called (even if they return empty results). Use Xcode's Memory Graph Debugger to verify no leaks. Test that defer blocks properly free Rust memory.
+    </standards>
+    <locations>
+ios/Tests/ (to be created in Story 1.6)
+Manual verification with Xcode Memory Graph Debugger for this story
+    </locations>
+    <ideas>
+- Verify RustBridge.swift compiles without errors (AC1)
+- Verify LoqaAudioDspModule implements Expo Module Definition (AC2)
+- Call placeholder async functions and verify they return without crashing (AC3)
+- Use Memory Graph Debugger to check for memory leaks (AC4)
+- Verify defer blocks are executed (add logging for verification)
+- Test module loads in example app successfully
+    </ideas>
+  </tests>
+</story-context>

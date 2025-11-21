@@ -1,0 +1,158 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>2</epicId>
+    <storyId>2</storyId>
+    <title>Implement iOS computeFFT Native Function</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/2-2-implement-ios-computefft-native-function.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>computeFFT working on iOS</iWant>
+    <soThat>iOS apps can perform frequency analysis</soThat>
+    <tasks>
+- Update LoqaAudioDspModule.swift with computeFFT
+  - Replace placeholder with actual implementation
+  - Define AsyncFunction("computeFFT")
+  - Accept buffer: [Float] parameter
+  - Accept options: [String: Any] parameter
+  - Return [String: Any] dictionary
+- Implement input validation
+  - Check buffer.isEmpty() → throw error
+  - Extract fftSize from options or default to buffer.count
+  - Validate fftSize is power of 2: (fftSize &amp; (fftSize - 1)) == 0
+  - Validate fftSize &gt;= 256 &amp;&amp; fftSize &lt;= 8192
+  - Extract windowType from options or default to "hanning"
+  - Map windowType string to integer (none=0, hanning=1, hamming=2, blackman=3)
+- Call Rust FFT function
+  - Import RustBridge functions
+  - Declare variables for Rust pointers
+  - Use defer block to guarantee memory cleanup
+  - Call buffer.withUnsafeBufferPointer for zero-copy
+  - Call compute_fft_rust(bufferPtr, length, fftSize, windowType)
+  - Check for null result (validation failure)
+  - Copy result to Swift array: Array(UnsafeBufferPointer(start: result, count: fftSize/2))
+  - Call free_fft_result_rust(result) in defer block
+- Build frequency array and return
+  - Calculate sample rate (default 44100 Hz from options)
+  - Build frequencies array: freq[i] = (sampleRate / fftSize) * i
+  - Create result dictionary with "magnitude" and "frequencies"
+  - Return dictionary
+- Implement error handling
+  - Throw NSError for invalid buffer
+  - Throw NSError for invalid fftSize
+  - Throw NSError if Rust returns null
+  - Include descriptive error messages
+  - Include error codes (e.g., "VALIDATION_ERROR", "FFT_ERROR")
+- Test iOS implementation
+  - Build iOS module successfully
+  - Test with example buffer (e.g., sine wave)
+  - Verify magnitude spectrum is correct
+  - Verify frequencies array is correct
+  - Test error handling with invalid inputs
+  - Use Memory Graph Debugger to verify no leaks
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given Rust FFT bindings exist, When I implement Swift computeFFT, Then LoqaAudioDspModule.swift exposes async function: AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any]) -&gt; [String: Any]
+
+AC2: Given the function is implemented, When I validate inputs, Then function validates inputs before calling Rust: Buffer is not empty, FFT size (from options or buffer.length) is power of 2, FFT size is between 256 and 8192
+
+AC3: Given inputs are valid, When I call Rust FFT, Then function marshals Swift Float array to UnsafePointer for Rust
+
+AC4: Given Rust returns results, When I process the return value, Then function copies Rust result to Swift array before freeing Rust memory (using defer)
+
+AC5: Given computation completes, When I return results, Then function returns dictionary with: "magnitude": Float array (length = fftSize / 2), "frequencies": Float array of frequency bin centers
+
+AC6: Given errors occur, When I handle errors, Then function throws descriptive NSError
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - iOS Swift FFI Pattern</title>
+        <section>Memory Management at FFI/JNI Boundary - iOS</section>
+        <snippet>CRITICAL: Use defer blocks to guarantee Rust memory is freed. Pattern: var rustResult: UnsafePointer? = nil; defer { if let ptr = rustResult { free_fft_result_rust(ptr) } }. Use buffer.withUnsafeBufferPointer for zero-copy input. Copy result to Swift array before freeing.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Expo Modules API</title>
+        <section>Native Module Interface - iOS</section>
+        <snippet>Use AsyncFunction for Promise-based API. Process on DispatchQueue.global(qos: .userInitiated) for background processing. Return dictionaries for complex results. Never block UI thread.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>ios/LoqaAudioDspModule.swift</path>
+        <kind>module</kind>
+        <symbol>LoqaAudioDspModule</symbol>
+        <lines>all</lines>
+        <reason>Replace placeholder computeFFT with actual implementation</reason>
+      </artifact>
+      <artifact>
+        <path>ios/RustFFI/RustBridge.swift</path>
+        <kind>bridge</kind>
+        <symbol>RustBridge</symbol>
+        <lines>all</lines>
+        <reason>Add FFI function declarations for compute_fft_rust and free_fft_result_rust</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <ios>
+        <framework name="Foundation" />
+        <library name="libloqua_voice_dsp.a" path="ios/RustFFI/" note="Rust FFT library from Story 2.1" />
+      </ios>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- CRITICAL: Use defer blocks to guarantee Rust memory cleanup
+- Use withUnsafeBufferPointer for zero-copy input
+- Copy Rust result to Swift array before freeing Rust memory
+- Process on background thread (.userInitiated QoS)
+- Never block UI thread
+- Window type mapping: none=0, hanning=1, hamming=2, blackman=3
+- Default sample rate: 44100 Hz
+- Depends on Story 2.1 (Rust FFT functions must exist)
+- Depends on Story 1.3 (Swift FFI scaffold)
+- Mirrors validation from Rust layer
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>computeFFT Expo Function</name>
+      <kind>Swift Expo AsyncFunction</kind>
+      <signature>
+AsyncFunction("computeFFT") { (buffer: [Float], options: [String: Any]) -&gt; [String: Any] in
+    // Implementation with defer blocks for memory safety
+    // Returns ["magnitude": [Float], "frequencies": [Float]]
+}
+      </signature>
+      <path>ios/LoqaAudioDspModule.swift</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Test with synthetic sine wave for predictable FFT peak. Verify magnitude array length = fftSize / 2. Verify frequencies array matches expected bin centers. Test all window types. Use Xcode Memory Graph Debugger to verify no leaks. Test error cases: empty buffer, non-power-of-2, out of range.
+    </standards>
+    <locations>
+Manual testing with example app for this story
+ios/Tests/FFTTests.swift (formal tests in Story 2.6)
+    </locations>
+    <ideas>
+- Generate 440 Hz sine wave, verify FFT peak near 440 Hz bin (AC1, AC3, AC4, AC5)
+- Test all window types produce different spectra (AC2)
+- Test empty buffer throws error (AC2, AC6)
+- Test non-power-of-2 fftSize throws error (AC2, AC6)
+- Test fftSize out of range throws error (AC2, AC6)
+- Use Memory Graph Debugger after computation to verify no leaks (AC4)
+- Verify defer block executes even on error paths
+    </ideas>
+  </tests>
+</story-context>

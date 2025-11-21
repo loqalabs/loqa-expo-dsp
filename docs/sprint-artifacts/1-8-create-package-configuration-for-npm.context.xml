@@ -1,0 +1,174 @@
+<story-context id=".bmad/bmm/workflows/4-implementation/story-context/template" v="1.0">
+  <metadata>
+    <epicId>1</epicId>
+    <storyId>8</storyId>
+    <title>Create Package Configuration for npm</title>
+    <status>drafted</status>
+    <generatedAt>2025-11-20</generatedAt>
+    <generator>BMAD Story Context Workflow</generator>
+    <sourceStoryPath>docs/sprint-artifacts/1-8-create-package-configuration-for-npm.md</sourceStoryPath>
+  </metadata>
+
+  <story>
+    <asA>developer</asA>
+    <iWant>proper npm package configuration</iWant>
+    <soThat>the module can be published and installed correctly</soThat>
+    <tasks>
+- Configure package.json for distribution
+  - Set name: "@loqalabs/loqa-audio-dsp"
+  - Set version: "0.1.0"
+  - Set description: "Production-grade audio DSP analysis for React Native/Expo"
+  - Set main: "lib/index.js"
+  - Set types: "lib/index.d.ts"
+  - Configure files array: ["lib", "ios", "android", "README.md", "API.md", "LICENSE"]
+  - Add peerDependencies: expo (^54.0.0), react (*), react-native (*)
+  - Add keywords: audio, dsp, fft, pitch, formants, spectrum, react-native, expo
+  - Set author: "Loqa Labs"
+  - Set license: "MIT"
+  - Add repository URL: https://github.com/loqalabs/loqa-audio-dsp
+  - Add homepage URL
+  - Add bugs URL
+- Configure build scripts
+  - Add "build" script using expo-module-scripts or tsc
+  - Configure TypeScript to output to lib/ directory
+  - Enable source map generation in tsconfig.json
+  - Add "prepublishOnly" script: npm run build
+  - Add "clean" script to remove lib/ directory
+- Create .npmignore file
+  - Exclude development files: \_\_tests\_\_, .github, example (if separate)
+  - Exclude .git directory and Git files
+  - Exclude IDE files (.vscode, .idea, *.swp)
+  - Exclude build artifacts not needed in package
+  - Include lib/, ios/, android/ directories
+- Create LICENSE file
+  - Add MIT License text
+  - Set copyright: Loqa Labs
+  - Set year: 2025
+- Create CHANGELOG.md
+  - Add header and introduction
+  - Create v0.1.0 section with date
+  - List "Added" features: All four DSP functions, Cross-platform iOS/Android support, TypeScript types and validation, Example app with demos, Complete documentation
+  - Use Conventional Commits format
+- Create RELEASING.md
+  - Document version bumping process (npm version)
+  - Document pre-release checklist: Tests pass, Documentation updated, CHANGELOG updated
+  - Document Git tagging process
+  - Document npm publishing process (automatic via GitHub Actions)
+  - Document post-release steps (GitHub release, announcement)
+  - Note NPM_TOKEN secret requirement
+- Verify package build and structure
+  - Run `npm run build` successfully
+  - Verify lib/ directory contains compiled JavaScript
+  - Verify lib/ directory contains .d.ts type definitions
+  - Verify source maps are generated
+  - Run `npm pack` to create tarball
+  - Inspect tarball contents to verify correct files included
+    </tasks>
+  </story>
+
+  <acceptanceCriteria>
+AC1: Given the module is buildable, When I configure package.json for distribution, Then package.json includes: name "@loqalabs/loqa-audio-dsp", version "0.1.0", description "Production-grade audio DSP analysis for React Native/Expo", main "lib/index.js", types "lib/index.d.ts", files ["lib", "ios", "android", "README.md", "API.md", "LICENSE"], peerDependencies: expo ^54.0.0, react, react-native, Proper keywords for npm discoverability, Repository, bugs, homepage URLs
+
+AC2: Given package.json is configured, When I run the build script, Then TypeScript compiles to lib/ directory
+
+AC3: Given the build succeeds, When I check the output, Then package includes source maps for debugging
+
+AC4: Given all configuration is complete, When I create release documentation, Then CHANGELOG.md is created with initial entry for v0.1.0 And RELEASING.md documents the release process
+  </acceptanceCriteria>
+
+  <artifacts>
+    <docs>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - npm Package Structure</title>
+        <section>npm Package Structure</section>
+        <snippet>Package name: @loqalabs/loqa-audio-dsp, version 0.1.0. Main: lib/index.js, Types: lib/index.d.ts. Files include: lib, ios, android, README.md, API.md, LICENSE. PeerDependencies: expo ^54.0.0, react *, react-native *. Use expo-module-scripts for building.</snippet>
+      </doc>
+      <doc>
+        <path>docs/architecture.md</path>
+        <title>Architecture Document - Release Process</title>
+        <section>Release Process</section>
+        <snippet>Version bump with npm version patch|minor|major. Update CHANGELOG.md. Tag and push: git push origin main --tags. GitHub Actions automatically publishes to npm on tag push. Runs full test suite before publishing.</snippet>
+      </doc>
+    </docs>
+    <code>
+      <artifact>
+        <path>package.json</path>
+        <kind>configuration</kind>
+        <symbol>package.json</symbol>
+        <lines>all</lines>
+        <reason>Needs comprehensive distribution configuration updates</reason>
+      </artifact>
+      <artifact>
+        <path>tsconfig.json</path>
+        <kind>configuration</kind>
+        <symbol>tsconfig.json</symbol>
+        <lines>all</lines>
+        <reason>Needs outDir set to "lib" and sourceMap enabled</reason>
+      </artifact>
+    </code>
+    <dependencies>
+      <javascript>
+        <package name="expo-module-scripts" version="^3.0.0" type="dev" note="For build script" />
+        <package name="typescript" version="^5.3.0" type="dev" />
+      </javascript>
+    </dependencies>
+  </artifacts>
+
+  <constraints>
+- Package name must be @loqalabs/loqa-audio-dsp
+- Version 0.1.0 for MVP release
+- MIT License required
+- Use expo-module-scripts for building or tsc
+- Source maps must be included for debugging
+- CHANGELOG follows Conventional Commits format
+- Depends on Story 1.7 (CI/CD pipeline expecting build script)
+- Completes Epic 1 foundation - package is now ready for development
+  </constraints>
+
+  <interfaces>
+    <interface>
+      <name>Package Configuration</name>
+      <kind>package.json</kind>
+      <signature>
+{
+  "name": "@loqalabs/loqa-audio-dsp",
+  "version": "0.1.0",
+  "description": "Production-grade audio DSP analysis for React Native/Expo",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "files": ["lib", "ios", "android", "README.md", "API.md", "LICENSE"],
+  "peerDependencies": {
+    "expo": "^54.0.0",
+    "react": "*",
+    "react-native": "*"
+  },
+  "keywords": ["audio", "dsp", "fft", "pitch", "formants", "spectrum", "react-native", "expo"]
+}
+      </signature>
+      <path>package.json</path>
+    </interface>
+  </interfaces>
+
+  <tests>
+    <standards>
+Use `npm pack` to create local tarball. Inspect tarball to verify correct files. Test installation in separate project: `npm install ../loqa-audio-dsp-0.1.0.tgz`. Verify package structure matches expectations. Ensure build script produces correct output.
+    </standards>
+    <locations>
+Manual verification with npm pack
+Test installation in separate clean Expo project
+    </locations>
+    <ideas>
+- Verify package.json has all required fields (AC1)
+- Run `npm run build` and verify success (AC2)
+- Check lib/ directory exists with .js and .d.ts files (AC2)
+- Verify source maps (.js.map files) are generated (AC3)
+- Run `npm pack` and inspect tarball contents
+- Verify CHANGELOG.md exists with v0.1.0 entry (AC4)
+- Verify RELEASING.md exists with release process (AC4)
+- Verify LICENSE file exists
+- Verify .npmignore excludes development files
+- Test install in clean project
+    </ideas>
+  </tests>
+</story-context>
