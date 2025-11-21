@@ -1,0 +1,86 @@
+{
+  "name": "@loqalabs/loqa-audio-dsp",
+  "version": "0.1.0",
+  "description": "Production-grade Expo native module for audio DSP analysis (FFT, pitch detection, formant extraction, spectral analysis)",
+  "main": "build/src/index.js",
+  "types": "build/src/index.d.ts",
+  "files": [
+    "build/",
+    "src/",
+    "ios/*.swift",
+    "ios/*.h",
+    "ios/*.m",
+    "ios/*.mm",
+    "ios/*.podspec",
+    "!ios/Tests",
+    "!ios/**/*Tests.swift",
+    "!ios/**/*Test.swift",
+    "android/build.gradle",
+    "android/src/main/",
+    "!android/src/test",
+    "!android/src/androidTest",
+    "expo-module.config.json",
+    "LoqaAudioDsp.podspec",
+    "README.md",
+    "API.md",
+    "INTEGRATION_GUIDE.md",
+    "CHANGELOG.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "tsc",
+    "clean": "expo-module clean",
+    "lint": "eslint . --ext .ts,.tsx",
+    "format": "prettier --write \"**/*.{ts,tsx,json,md}\"",
+    "test": "jest",
+    "validate:structure": "./scripts/validate-module-structure.sh",
+    "prepare": "expo-module prepare",
+    "prepublishOnly": "expo-module prepublishOnly",
+    "expo-module": "expo-module"
+  },
+  "keywords": [
+    "expo",
+    "react-native",
+    "audio",
+    "dsp",
+    "fft",
+    "pitch-detection",
+    "formants",
+    "spectral-analysis"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loqalabs/loqa-audio-dsp.git"
+  },
+  "bugs": {
+    "url": "https://github.com/loqalabs/loqa-audio-dsp/issues"
+  },
+  "author": "Loqa Labs <33356887+annabarnes1138@users.noreply.github.com> (https://github.com/loqalabs)",
+  "license": "MIT",
+  "homepage": "https://github.com/loqalabs/loqa-audio-dsp#readme",
+  "peerDependencies": {
+    "expo": ">=52.0.0",
+    "expo-modules-core": "*",
+    "react": ">=18.0.0",
+    "react-native": ">=0.72.0"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/react": "^19.0.0",
+    "eslint": "^8.0.0",
+    "eslint-config-expo": "^10.0.0",
+    "eslint-config-prettier": "^10.1.8",
+    "expo": "^54.0.18",
+    "expo-module-scripts": "^5.0.7",
+    "jest": "^30.2.0",
+    "jest-expo": "^54.0.13",
+    "prettier": "^3.0.0",
+    "react": "^19.2.0",
+    "react-native": "0.81.5",
+    "ts-jest": "^29.4.5",
+    "typescript": "^5.3.0"
+  }
+}
