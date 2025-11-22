@@ -48,7 +48,7 @@ development_status:
 
   epic-2: backlog
   2-1-implement-fft-rust-function-bindings: done
-  2-2-implement-ios-computefft-native-function: ready-for-dev
+  2-2-implement-ios-computefft-native-function: done
   2-3-implement-android-computefft-native-function: ready-for-dev
   2-4-implement-typescript-input-validation: ready-for-dev
   2-5-implement-typescript-computefft-api-function: ready-for-dev

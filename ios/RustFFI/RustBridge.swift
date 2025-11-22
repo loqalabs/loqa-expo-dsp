@@ -6,13 +6,14 @@ import Foundation
 
 // MARK: FFT Functions (Epic 2)
 
-/// Placeholder FFI declaration for FFT computation
-/// Will be implemented in Story 2.2
+/// FFI declaration for FFT computation with window type support
+/// Implemented in Story 2.1, called from Story 2.2
 @_silgen_name("compute_fft_rust")
 func compute_fft_rust(
     buffer: UnsafePointer<Float>,
     length: Int32,
-    fftSize: Int32
+    fftSize: Int32,
+    windowType: Int32
 ) -> UnsafePointer<Float>?
 
 /// Placeholder FFI declaration for freeing FFT result memory
@@ -95,10 +96,10 @@ public enum RustFFIError: Error {
 
 // MARK: FFT Wrapper (Placeholder for Epic 2)
 
-/// Placeholder Swift wrapper for FFT computation
+/// Swift wrapper for FFT computation with window type support
 /// MEMORY SAFETY PATTERN: Uses defer block to guarantee Rust memory is freed
-/// Will be fully implemented in Story 2.2
-public func computeFFTWrapper(buffer: [Float], fftSize: Int) throws -> [Float] {
+/// Implemented in Story 2.2
+public func computeFFTWrapper(buffer: [Float], fftSize: Int, windowType: Int32) throws -> [Float] {
     // Input validation
     guard !buffer.isEmpty else {
         throw RustFFIError.invalidInput("Buffer cannot be empty")
@@ -106,6 +107,10 @@ public func computeFFTWrapper(buffer: [Float], fftSize: Int) throws -> [Float] {
 
     guard fftSize > 0 && (fftSize & (fftSize - 1)) == 0 else {
         throw RustFFIError.invalidInput("FFT size must be a power of 2")
+    }
+
+    guard fftSize >= 256 && fftSize <= 8192 else {
+        throw RustFFIError.invalidInput("FFT size must be between 256 and 8192")
     }
 
     var rustResult: UnsafePointer<Float>? = nil
@@ -126,12 +131,13 @@ public func computeFFTWrapper(buffer: [Float], fftSize: Int) throws -> [Float] {
         rustResult = compute_fft_rust(
             baseAddress,
             Int32(buffer.count),
-            Int32(fftSize)
+            Int32(fftSize),
+            windowType
         )
     }
 
     guard let result = rustResult else {
-        throw RustFFIError.computationFailed("FFT computation returned null")
+        throw RustFFIError.computationFailed("FFT computation failed - Rust returned null (validation failure or computation error)")
     }
 
     // Copy to Swift array before freeing (defer will free after this)
