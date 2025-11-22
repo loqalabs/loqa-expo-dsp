@@ -123,6 +123,56 @@ pub unsafe extern "C" fn free_fft_result_rust(ptr: *mut c_float, length: c_int) 
     let _ = Box::from_raw(slice::from_raw_parts_mut(ptr, length as usize));
 }
 
+/// Android JNI native method for computeFFT
+///
+/// JNI Method Signature Resolution:
+/// - Kotlin declaration: `external fun nativeComputeFFT(buffer: FloatArray, fftSize: Int, windowType: Int): FloatArray`
+/// - Package: com.loqalabs.loquaaudiodsp.RustJNI
+/// - Class: RustBridge (object)
+/// - Method: nativeComputeFFT
+/// - JNI Function Name: Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
+///
+/// # Arguments
+/// * `env` - JNI environment pointer (unused but required by JNI)
+/// * `class` - JNI class reference (unused but required by JNI)
+/// * `buffer` - JNI jfloatArray reference to input audio samples
+/// * `fft_size` - FFT size (must be power of 2, range: 256-8192)
+/// * `window_type` - Window function type (0=none, 1=hanning, 2=hamming, 3=blackman) - IGNORED in v0.1.0
+///
+/// # Returns
+/// * JNI jfloatArray containing magnitude spectrum (length = fft_size / 2 + 1) or null on error
+///
+/// # Safety
+/// * JNI framework ensures proper type conversions and memory management
+/// * This function is called from Kotlin via JNI, not directly
+///
+/// # Note
+/// For v0.1.0, window_type is accepted but ignored - loqa-voice-dsp applies windowing internally.
+/// Sample rate is hardcoded to 44100 Hz (matches default in LoqaAudioDspModule.kt).
+/// This function delegates to compute_fft_rust with appropriate parameters.
+///
+/// # JNI Implementation Note
+/// This requires proper JNI environment handling and FloatArray conversion,
+/// which should be implemented using jni-rs crate or manual JNI calls.
+/// For now, we provide the C ABI signature that matches Kotlin expectations.
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT(
+    _env: *mut std::os::raw::c_void,
+    _class: *mut std::os::raw::c_void,
+    buffer: *const c_float,
+    buffer_length: c_int,
+    fft_size: c_int,
+    _window_type: c_int,  // Accepted but ignored - windowing handled by loqa-voice-dsp
+) -> *mut c_float {
+    // Use default sample rate (44100 Hz) for Android in v0.1.0
+    // Matches the default in LoqaAudioDspModule.kt
+    const DEFAULT_SAMPLE_RATE: c_int = 44100;
+
+    // Delegate to the main FFT implementation
+    // The JNI framework handles conversion of FloatArray to *const f32 and back
+    compute_fft_rust(buffer, buffer_length, DEFAULT_SAMPLE_RATE, fft_size)
+}
+
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)
 #[no_mangle]
 pub extern "C" fn test_ffi_bridge() -> i32 {

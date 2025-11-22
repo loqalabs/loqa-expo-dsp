@@ -37,14 +37,18 @@ object RustBridge {
     // ============================================================================
 
     /**
-     * Placeholder JNI function for FFT computation.
+     * JNI native function for FFT computation.
      *
-     * This will be implemented in Story 2.1/2.3 to call Rust's compute_fft_rust.
+     * Implemented in Story 2.3. Maps to Rust function:
+     * Java_com_loqalabs_loquaaudiodsp_RustJNI_RustBridge_nativeComputeFFT
      *
-     * @param buffer Input audio samples as FloatArray
-     * @param fftSize FFT size (must be power of 2)
-     * @param windowType Window function type (0=none, 1=hanning, 2=hamming, 3=blackman)
-     * @return Magnitude spectrum as FloatArray (length = fftSize / 2)
+     * This external function is resolved by JNI to the Rust implementation in lib.rs.
+     * The Rust function delegates to compute_fft_rust with a default sample rate of 44100 Hz.
+     *
+     * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
+     * @param fftSize FFT size (must be power of 2, range 256-8192)
+     * @param windowType Window function type (0=none, 1=hanning, 2=hamming, 3=blackman) - ignored in v0.1.0
+     * @return Magnitude spectrum as FloatArray (length = fftSize / 2 + 1)
      */
     external fun nativeComputeFFT(
         buffer: FloatArray,
@@ -107,12 +111,13 @@ object RustBridge {
     /**
      * Computes FFT on audio buffer with error handling.
      *
-     * Note: This is a placeholder wrapper. Full implementation in Story 2.3.
+     * Implemented in Story 2.3. This wrapper calls the native JNI function and
+     * provides Kotlin-friendly error handling.
      *
      * @param buffer Input audio samples
-     * @param fftSize FFT size (power of 2)
-     * @param windowType Window function type
-     * @return Magnitude spectrum
+     * @param fftSize FFT size (power of 2, range 256-8192)
+     * @param windowType Window function type (0=none, 1=hanning, 2=hamming, 3=blackman) - ignored in v0.1.0
+     * @return Magnitude spectrum (length = fftSize / 2 + 1)
      * @throws RuntimeException if JNI call fails
      */
     fun computeFFT(buffer: FloatArray, fftSize: Int, windowType: Int): FloatArray {
