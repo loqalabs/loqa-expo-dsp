@@ -29,16 +29,16 @@ cargo build --release --target aarch64-apple-ios-sim
 # Create universal simulator library
 echo "Creating universal simulator library..."
 lipo -create \
-    target/x86_64-apple-ios/release/libloqua_voice_dsp.a \
-    target/aarch64-apple-ios-sim/release/libloqua_voice_dsp.a \
-    -output target/release/libloqua_voice_dsp_sim.a
+    target/x86_64-apple-ios/release/libloqa_voice_dsp.a \
+    target/aarch64-apple-ios-sim/release/libloqa_voice_dsp.a \
+    -output target/release/libloqa_voice_dsp_sim.a
 
 # Create XCFramework (supports both device and simulator)
 echo "Creating XCFramework..."
 rm -rf "$OUTPUT_DIR/LoqaVoiceDSP.xcframework"
 xcodebuild -create-xcframework \
-    -library target/aarch64-apple-ios/release/libloqua_voice_dsp.a \
-    -library target/release/libloqua_voice_dsp_sim.a \
+    -library target/aarch64-apple-ios/release/libloqa_voice_dsp.a \
+    -library target/release/libloqa_voice_dsp_sim.a \
     -output "$OUTPUT_DIR/LoqaVoiceDSP.xcframework"
 
 echo "✅ iOS library built successfully"
