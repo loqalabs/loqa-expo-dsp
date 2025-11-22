@@ -41,6 +41,35 @@ npx expo install @loqalabs/loqa-audio-dsp
 
 ## Quick Start
 
+### FFT Analysis Example
+
+```typescript
+import { computeFFT } from '@loqalabs/loqa-audio-dsp';
+
+// Example: Analyze audio frequency content
+const audioBuffer = new Float32Array(2048); // Your audio samples
+// ... fill buffer with audio data from microphone or file ...
+
+// Compute FFT with options
+const result = await computeFFT(audioBuffer, {
+  fftSize: 2048,
+  windowType: 'hanning',
+  includePhase: false
+});
+
+// Find the dominant frequency
+const maxMagnitudeIndex = result.magnitude.indexOf(
+  Math.max(...result.magnitude)
+);
+const dominantFrequency = result.frequencies[maxMagnitudeIndex];
+
+console.log(`Dominant frequency: ${dominantFrequency.toFixed(2)} Hz`);
+console.log(`Magnitude bins: ${result.magnitude.length}`);
+console.log(`Frequency range: ${result.frequencies[0]} Hz - ${result.frequencies[result.frequencies.length - 1]} Hz`);
+```
+
+### Complete DSP Example
+
 ```typescript
 import { detectPitch, computeFFT, extractFormants, analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
 
@@ -53,8 +82,8 @@ const pitch = detectPitch(samples, sampleRate, { minFreq: 80, maxFreq: 400 });
 console.log(`Pitch: ${pitch.frequency} Hz`);
 
 // FFT analysis
-const fft = computeFFT(samples, 2048);
-console.log(`Frequency spectrum has ${fft.length} bins`);
+const fft = await computeFFT(samples, { fftSize: 2048 });
+console.log(`Frequency spectrum has ${fft.magnitude.length} bins`);
 
 // Formant extraction
 const formants = extractFormants(samples, sampleRate, { lpcOrder: 12 });

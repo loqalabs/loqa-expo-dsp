@@ -53,7 +53,7 @@ development_status:
   2-4-implement-typescript-input-validation: done
   2-5-implement-typescript-computefft-api-function: done
   2-6-write-unit-tests-for-computefft: done
-  2-7-add-computefft-to-public-api-and-documentation: ready-for-dev
+  2-7-add-computefft-to-public-api-and-documentation: done
   epic-2-retrospective: optional
 
   epic-3: backlog
