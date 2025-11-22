@@ -1,5 +1,5 @@
 // Input validation functions for LoqaAudioDsp module
-// Function signatures defined here; implementations will be added in Epic 2
+import { ValidationError } from './errors';
 
 /**
  * Validates an audio buffer for DSP processing
@@ -20,8 +20,36 @@
  * ```
  */
 export function validateAudioBuffer(buffer: Float32Array | number[]): void {
-  // Implementation in Epic 2 (Story 2.4)
-  throw new Error('Not implemented - will be added in Epic 2');
+  // Check for null/undefined
+  if (!buffer) {
+    throw new ValidationError('Audio buffer cannot be null or undefined', {
+      buffer,
+    });
+  }
+
+  // Check for empty buffer
+  if (buffer.length === 0) {
+    throw new ValidationError('Audio buffer cannot be empty', {
+      bufferLength: 0,
+    });
+  }
+
+  // Check maximum buffer size (16384 samples as per architecture)
+  if (buffer.length > 16384) {
+    throw new ValidationError('Buffer too large (max 16384 samples)', {
+      bufferLength: buffer.length,
+      maxLength: 16384,
+    });
+  }
+
+  // Check for NaN or Infinity values
+  const hasInvalidValues = Array.from(buffer).some((v) => !isFinite(v));
+
+  if (hasInvalidValues) {
+    throw new ValidationError('Buffer contains NaN or Infinity values', {
+      bufferLength: buffer.length,
+    });
+  }
 }
 
 /**
@@ -41,8 +69,21 @@ export function validateAudioBuffer(buffer: Float32Array | number[]): void {
  * ```
  */
 export function validateSampleRate(sampleRate: number): void {
-  // Implementation in Epic 2 (Story 2.4)
-  throw new Error('Not implemented - will be added in Epic 2');
+  // Check if sample rate is an integer
+  if (!Number.isInteger(sampleRate)) {
+    throw new ValidationError('Sample rate must be an integer', {
+      sampleRate,
+    });
+  }
+
+  // Check if sample rate is within supported range (8000-48000 Hz)
+  if (sampleRate < 8000 || sampleRate > 48000) {
+    throw new ValidationError('Sample rate must be between 8000 and 48000 Hz', {
+      sampleRate,
+      minSampleRate: 8000,
+      maxSampleRate: 48000,
+    });
+  }
 }
 
 /**
@@ -63,6 +104,27 @@ export function validateSampleRate(sampleRate: number): void {
  * ```
  */
 export function validateFFTSize(fftSize: number): void {
-  // Implementation in Epic 2 (Story 2.4)
-  throw new Error('Not implemented - will be added in Epic 2');
+  // Check if FFT size is an integer
+  if (!Number.isInteger(fftSize)) {
+    throw new ValidationError('FFT size must be an integer', {
+      fftSize,
+    });
+  }
+
+  // Check if FFT size is a power of 2
+  // Power of 2 check: (n & (n - 1)) === 0 && n > 0
+  if (fftSize <= 0 || (fftSize & (fftSize - 1)) !== 0) {
+    throw new ValidationError('FFT size must be a power of 2', {
+      fftSize,
+    });
+  }
+
+  // Check if FFT size is within supported range (256-8192)
+  if (fftSize < 256 || fftSize > 8192) {
+    throw new ValidationError('FFT size must be between 256 and 8192', {
+      fftSize,
+      minFFTSize: 256,
+      maxFFTSize: 8192,
+    });
+  }
 }

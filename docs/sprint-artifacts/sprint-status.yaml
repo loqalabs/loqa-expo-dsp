@@ -50,7 +50,7 @@ development_status:
   2-1-implement-fft-rust-function-bindings: done
   2-2-implement-ios-computefft-native-function: done
   2-3-implement-android-computefft-native-function: done
-  2-4-implement-typescript-input-validation: ready-for-dev
+  2-4-implement-typescript-input-validation: done
   2-5-implement-typescript-computefft-api-function: ready-for-dev
   2-6-write-unit-tests-for-computefft: ready-for-dev
   2-7-add-computefft-to-public-api-and-documentation: ready-for-dev
