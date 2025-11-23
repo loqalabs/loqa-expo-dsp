@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.5] - 2025-11-23
+
+### Fixed
+
+- **Critical**: Fix Swift compilation errors in ExpoModulesCore async functions and FFI declarations
+  - Removed `DispatchQueue.global().async` wrappers from all 4 async functions (computeFFT, detectPitch, extractFormants, analyzeSpectrum)
+  - ExpoModulesCore's `AsyncFunction` already handles background execution - manual dispatch queue was causing syntax errors
+  - Added `_` parameter labels to all FFI function declarations (compute_fft_rust, detect_pitch_rust, extract_formants_rust, analyze_spectrum_rust)
+  - C FFI functions should use unnamed parameters to avoid argument label requirements at call sites
+  - Fixes Swift compilation errors: "trailing closure passed to parameter of type 'DispatchWorkItem'" and "missing argument labels in call"
+  - iOS build now succeeds without Swift compiler errors
+
 ## [0.1.4] - 2025-11-23
 
 ### Fixed
@@ -109,6 +121,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.1.5]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.5
 [0.1.4]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.2

@@ -10,10 +10,10 @@ import Foundation
 /// Implemented in Story 2.1, called from Story 2.2
 @_silgen_name("compute_fft_rust")
 func compute_fft_rust(
-    buffer: UnsafePointer<Float>,
-    length: Int32,
-    fftSize: Int32,
-    windowType: Int32
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ fftSize: Int32,
+    _ windowType: Int32
 ) -> UnsafePointer<Float>?
 
 /// Placeholder FFI declaration for freeing FFT result memory
@@ -36,9 +36,9 @@ public struct PitchResult {
 /// Note: Rust returns PitchResult by value (small struct, no heap allocation needed)
 @_silgen_name("detect_pitch_rust")
 func detect_pitch_rust(
-    buffer: UnsafePointer<Float>,
-    length: Int32,
-    sampleRate: Int32
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ sampleRate: Int32
 ) -> PitchResult
 
 // MARK: Formant Extraction Functions (Epic 3)
@@ -59,10 +59,10 @@ public struct FormantsResult {
 /// Note: Rust returns FormantsResult by value (small struct, no heap allocation needed)
 @_silgen_name("extract_formants_rust")
 func extract_formants_rust(
-    buffer: UnsafePointer<Float>,
-    length: Int32,
-    sampleRate: Int32,
-    lpcOrder: Int32
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ sampleRate: Int32,
+    _ lpcOrder: Int32
 ) -> FormantsResult
 
 // MARK: Spectrum Analysis Functions (Epic 4)
@@ -71,9 +71,9 @@ func extract_formants_rust(
 /// Will be implemented in Story 4.2
 @_silgen_name("analyze_spectrum_rust")
 func analyze_spectrum_rust(
-    buffer: UnsafePointer<Float>,
-    length: Int32,
-    sampleRate: Int32
+    _ buffer: UnsafePointer<Float>,
+    _ length: Int32,
+    _ sampleRate: Int32
 ) -> UnsafePointer<Float>? // Returns [centroid, rolloff, tilt]
 
 /// Placeholder FFI declaration for freeing spectrum analysis result memory
