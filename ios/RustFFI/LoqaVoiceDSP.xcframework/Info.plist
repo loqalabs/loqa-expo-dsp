@@ -6,11 +6,11 @@
 	<array>
 		<dict>
 			<key>BinaryPath</key>
-			<string>libloqa_voice_dsp_sim.a</string>
+			<string>libloqa_voice_dsp.a</string>
 			<key>LibraryIdentifier</key>
 			<string>ios-arm64_x86_64-simulator</string>
 			<key>LibraryPath</key>
-			<string>libloqa_voice_dsp_sim.a</string>
+			<string>libloqa_voice_dsp.a</string>
 			<key>SupportedArchitectures</key>
 			<array>
 				<string>arm64</string>
