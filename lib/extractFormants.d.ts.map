@@ -1,0 +1,1 @@
+{"version":3,"file":"extractFormants.d.ts","sourceRoot":"","sources":["../src/extractFormants.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,wBAAwB,EAAE,cAAc,EAAE,MAAM,SAAS,CAAC;AAIxE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GA6BG;AACH,wBAAsB,eAAe,CACnC,WAAW,EAAE,YAAY,GAAG,MAAM,EAAE,EACpC,UAAU,EAAE,MAAM,EAClB,OAAO,CAAC,EAAE,OAAO,CAAC,wBAAwB,CAAC,GAC1C,OAAO,CAAC,cAAc,CAAC,CAuFzB"}

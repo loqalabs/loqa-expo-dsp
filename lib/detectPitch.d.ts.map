@@ -1,0 +1,1 @@
+{"version":3,"file":"detectPitch.d.ts","sourceRoot":"","sources":["../src/detectPitch.ts"],"names":[],"mappings":"AAGA,OAAO,KAAK,EAAE,qBAAqB,EAAE,WAAW,EAAE,MAAM,SAAS,CAAC;AAIlE;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;GAgCG;AACH,wBAAsB,WAAW,CAC/B,WAAW,EAAE,YAAY,GAAG,MAAM,EAAE,EACpC,UAAU,EAAE,MAAM,EAClB,OAAO,CAAC,EAAE,OAAO,CAAC,qBAAqB,CAAC,GACvC,OAAO,CAAC,WAAW,CAAC,CAyFtB"}
