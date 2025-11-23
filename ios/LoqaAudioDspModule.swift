@@ -17,17 +17,17 @@ public class LoqaAudioDspModule: Module {
 
         // Validate inputs
         guard !buffer.isEmpty else {
-          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty", nil)
+          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
           return
         }
 
         guard fftSize > 0 && (fftSize & (fftSize - 1)) == 0 else {
-          promise.reject("VALIDATION_ERROR", "FFT size must be a power of 2", nil)
+          promise.reject("VALIDATION_ERROR", "FFT size must be a power of 2")
           return
         }
 
         guard fftSize >= 256 && fftSize <= 8192 else {
-          promise.reject("VALIDATION_ERROR", "FFT size must be between 256 and 8192", nil)
+          promise.reject("VALIDATION_ERROR", "FFT size must be between 256 and 8192")
           return
         }
 
@@ -43,7 +43,7 @@ public class LoqaAudioDspModule: Module {
         case "blackman":
           windowType = 3
         default:
-          promise.reject("VALIDATION_ERROR", "Invalid window type. Must be one of: none, hanning, hamming, blackman", nil)
+          promise.reject("VALIDATION_ERROR", "Invalid window type. Must be one of: none, hanning, hamming, blackman")
           return
         }
 
@@ -64,15 +64,15 @@ public class LoqaAudioDspModule: Module {
         // Handle Rust FFI errors with specific error codes
         switch error {
         case .invalidInput(let message):
-          promise.reject("VALIDATION_ERROR", message, nil)
+          promise.reject("VALIDATION_ERROR", message)
         case .computationFailed(let message):
-          promise.reject("FFT_ERROR", message, nil)
+          promise.reject("FFT_ERROR", message)
         case .memoryAllocationFailed:
-          promise.reject("FFT_ERROR", "Memory allocation failed in Rust FFT computation", nil)
+          promise.reject("FFT_ERROR", "Memory allocation failed in Rust FFT computation")
         }
       } catch {
         // Handle unexpected errors
-        promise.reject("FFT_ERROR", error.localizedDescription, error)
+        promise.reject("FFT_ERROR", error.localizedDescription)
       }
     }
 
@@ -118,7 +118,7 @@ public class LoqaAudioDspModule: Module {
         }
       } catch {
         // Handle unexpected errors
-        promise.reject("PITCH_ERROR", error.localizedDescription, error)
+        promise.reject("PITCH_ERROR", error.localizedDescription)
       }
     }
 
@@ -172,7 +172,7 @@ public class LoqaAudioDspModule: Module {
         }
       } catch {
         // Handle unexpected errors
-        promise.reject("FORMANTS_ERROR", error.localizedDescription, error)
+        promise.reject("FORMANTS_ERROR", error.localizedDescription)
       }
     }
 
@@ -217,7 +217,7 @@ public class LoqaAudioDspModule: Module {
         }
       } catch {
         // Handle unexpected errors
-        promise.reject("SPECTRUM_ERROR", error.localizedDescription, error)
+        promise.reject("SPECTRUM_ERROR", error.localizedDescription)
       }
     }
   }
