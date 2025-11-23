@@ -20,8 +20,9 @@ Pod::Spec.new do |s|
 
   s.dependency 'ExpoModulesCore'
 
-  # Swift and Objective-C source files
-  s.source_files = "**/*.{h,m,mm,swift,hpp,cpp}"
+  # Swift and Objective-C source files (exclude Tests directory)
+  s.source_files = "*.{h,m,mm,swift,hpp,cpp}", "RustFFI/**/*.{h,hpp,cpp}"
+  s.exclude_files = "Tests/**/*"
 
   # Rust XCFramework (supports device + simulator)
   s.vendored_frameworks = "RustFFI/LoqaVoiceDSP.xcframework"
