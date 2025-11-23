@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.4] - 2025-11-23
+
+### Fixed
+
+- **Critical**: Include RustBridge.swift in podspec compilation
+  - Added `.swift` extension to RustFFI source_files pattern in podspec
+  - Previous fix (v0.1.3) excluded test files but inadvertently excluded RustBridge.swift
+  - This was causing missing symbol errors: "cannot find 'computeFFTWrapper' in scope"
+  - RustBridge.swift contains critical FFI wrapper functions for Rust DSP core
+  - Now correctly includes Swift bridge files from RustFFI/ directory while still excluding Tests/
+
 ## [0.1.3] - 2025-11-23
 
 ### Fixed
@@ -98,6 +109,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.1.4]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.4
 [0.1.3]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.3
 [0.1.2]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.2
 [0.1.1]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.1
