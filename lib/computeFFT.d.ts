@@ -27,5 +27,8 @@ import type { FFTOptions, FFTResult } from './types';
  * console.log('Frequencies:', result.frequencies);
  * ```
  */
-export declare function computeFFT(audioBuffer: Float32Array | number[], options?: FFTOptions): Promise<FFTResult>;
+export declare function computeFFT(
+  audioBuffer: Float32Array | number[],
+  options?: FFTOptions
+): Promise<FFTResult>;
 //# sourceMappingURL=computeFFT.d.ts.map

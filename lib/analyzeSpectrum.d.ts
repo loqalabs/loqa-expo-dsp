@@ -28,5 +28,9 @@ import type { SpectrumAnalysisOptions, SpectrumResult } from './types';
  * console.log(`Spectral tilt: ${result.tilt}`);
  * ```
  */
-export declare function analyzeSpectrum(audioBuffer: Float32Array | number[], sampleRate: number, options?: Partial<SpectrumAnalysisOptions>): Promise<SpectrumResult>;
+export declare function analyzeSpectrum(
+  audioBuffer: Float32Array | number[],
+  sampleRate: number,
+  options?: Partial<SpectrumAnalysisOptions>
+): Promise<SpectrumResult>;
 //# sourceMappingURL=analyzeSpectrum.d.ts.map
