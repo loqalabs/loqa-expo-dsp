@@ -61,7 +61,7 @@ development_status:
   3-2-implement-formant-extraction-rust-function-bindings: done
   3-3-implement-ios-and-android-native-functions-for-pitch-and-formants: done
   3-4-implement-typescript-detectpitch-and-extractformants-apis: done
-  3-5-write-unit-tests-for-pitch-and-formant-functions: ready-for-dev
+  3-5-write-unit-tests-for-pitch-and-formant-functions: done
   3-6-add-pitch-and-formant-functions-to-public-api: ready-for-dev
   epic-3-retrospective: optional
 
