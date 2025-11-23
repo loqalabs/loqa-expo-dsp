@@ -1,6 +1,6 @@
 {
   "name": "@loqalabs/loqa-audio-dsp",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Production-grade Expo native module for audio DSP analysis (FFT, pitch detection, formant extraction, spectral analysis)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
