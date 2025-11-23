@@ -13,7 +13,11 @@ export class LoqaAudioDspError extends Error {
    * @param code - Error code for programmatic error handling
    * @param details - Additional error details (optional)
    */
-  constructor(message: string, public code: string, public details?: Record<string, unknown>) {
+  constructor(
+    message: string,
+    public code: string,
+    public details?: Record<string, unknown>
+  ) {
     super(message);
     this.name = 'LoqaAudioDspError';
   }

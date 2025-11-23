@@ -1,5 +1,7 @@
 // Comprehensive tests for computeFFT function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+
+import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 import { computeFFT } from '../src/computeFFT';
 import { ValidationError, NativeModuleError } from '../src/errors';
 
@@ -15,8 +17,6 @@ jest.mock('../src/LoqaAudioDspModule', () => ({
 jest.mock('../src/utils', () => ({
   logDebug: jest.fn(),
 }));
-
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 
 /**
  * Helper function to generate a synthetic sine wave
@@ -168,7 +168,7 @@ describe('computeFFT', () => {
 
     it('should accept all window types', async () => {
       const audioBuffer = new Float32Array(512);
-      const windowTypes: Array<'hanning' | 'hamming' | 'blackman' | 'none'> = [
+      const windowTypes: ('hanning' | 'hamming' | 'blackman' | 'none')[] = [
         'hanning',
         'hamming',
         'blackman',

@@ -35,7 +35,7 @@ export async function extractPCMFromRecording(uri: string): Promise<{
 
     // Read the file as base64
     const base64Audio = await FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.Base64,
+      encoding: 'base64',
     });
 
     // Unload the sound

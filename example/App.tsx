@@ -1,13 +1,12 @@
+import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { NavigationContainer } from '@react-navigation/native';
 import React from 'react';
 
-import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-
-import { FFTScreen } from './src/screens/FFTScreen';
-import { PitchScreen } from './src/screens/PitchScreen';
-import { FormantScreen } from './src/screens/FormantScreen';
-import { SpectrumScreen } from './src/screens/SpectrumScreen';
 import { BenchmarkScreen } from './src/screens/BenchmarkScreen';
+import { FFTScreen } from './src/screens/FFTScreen';
+import { FormantScreen } from './src/screens/FormantScreen';
+import { PitchScreen } from './src/screens/PitchScreen';
+import { SpectrumScreen } from './src/screens/SpectrumScreen';
 
 const Tab = createBottomTabNavigator();
 

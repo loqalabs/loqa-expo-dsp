@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { detectPitch } from '@loqalabs/loqa-audio-dsp';
 import {
   startAudioStream,
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
+import { detectPitch } from '@loqalabs/loqa-audio-dsp';
 import type { EventSubscription } from 'expo-modules-core';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 const NOTE_NAMES = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -177,8 +177,8 @@ export function PitchScreen() {
                             pitchResult.confidence > 0.7
                               ? '#27AE60'
                               : pitchResult.confidence > 0.4
-                              ? '#F39C12'
-                              : '#E74C3C',
+                                ? '#F39C12'
+                                : '#E74C3C',
                         },
                       ]}
                     />

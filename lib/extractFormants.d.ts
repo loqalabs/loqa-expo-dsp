@@ -29,9 +29,5 @@ import type { FormantExtractionOptions, FormantsResult } from './types';
  * console.log(`Bandwidths:`, result.bandwidths);
  * ```
  */
-export declare function extractFormants(
-  audioBuffer: Float32Array | number[],
-  sampleRate: number,
-  options?: Partial<FormantExtractionOptions>
-): Promise<FormantsResult>;
+export declare function extractFormants(audioBuffer: Float32Array | number[], sampleRate: number, options?: Partial<FormantExtractionOptions>): Promise<FormantsResult>;
 //# sourceMappingURL=extractFormants.d.ts.map

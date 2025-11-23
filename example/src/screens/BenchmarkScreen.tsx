@@ -1,3 +1,9 @@
+import {
+  computeFFT,
+  detectPitch,
+  extractFormants,
+  analyzeSpectrum,
+} from '@loqalabs/loqa-audio-dsp';
 import React, { useState } from 'react';
 import {
   View,
@@ -7,12 +13,6 @@ import {
   ScrollView,
   ActivityIndicator,
 } from 'react-native';
-import {
-  computeFFT,
-  detectPitch,
-  extractFormants,
-  analyzeSpectrum,
-} from '@loqalabs/loqa-audio-dsp';
 
 // Performance NFR targets (in milliseconds)
 const NFR_TARGETS = {

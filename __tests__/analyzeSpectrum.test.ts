@@ -1,5 +1,7 @@
 // Comprehensive tests for analyzeSpectrum function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
+
+import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 import { analyzeSpectrum } from '../src/analyzeSpectrum';
 import { ValidationError, NativeModuleError } from '../src/errors';
 
@@ -15,8 +17,6 @@ jest.mock('../src/LoqaAudioDspModule', () => ({
 jest.mock('../src/utils', () => ({
   logDebug: jest.fn(),
 }));
-
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 
 /**
  * Helper function to generate a synthetic sine wave

@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { computeFFT } from '@loqalabs/loqa-audio-dsp';
 import {
   startAudioStream,
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
+import { computeFFT } from '@loqalabs/loqa-audio-dsp';
 import type { EventSubscription } from 'expo-modules-core';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 
 export function FFTScreen() {
   const [isStreaming, setIsStreaming] = useState(false);

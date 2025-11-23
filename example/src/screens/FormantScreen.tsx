@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
-import { extractFormants } from '@loqalabs/loqa-audio-dsp';
 import {
   startAudioStream,
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
+import { extractFormants } from '@loqalabs/loqa-audio-dsp';
 import type { EventSubscription } from 'expo-modules-core';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView, Dimensions } from 'react-native';
 import Svg, { Circle, Text as SvgText, Line } from 'react-native-svg';
 
 // Vowel reference points for F1/F2 plot (approximate)

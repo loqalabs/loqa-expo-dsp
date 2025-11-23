@@ -32,9 +32,5 @@ import type { PitchDetectionOptions, PitchResult } from './types';
  * }
  * ```
  */
-export declare function detectPitch(
-  audioBuffer: Float32Array | number[],
-  sampleRate: number,
-  options?: Partial<PitchDetectionOptions>
-): Promise<PitchResult>;
+export declare function detectPitch(audioBuffer: Float32Array | number[], sampleRate: number, options?: Partial<PitchDetectionOptions>): Promise<PitchResult>;
 //# sourceMappingURL=detectPitch.d.ts.map

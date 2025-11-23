@@ -1,12 +1,12 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
-import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
 import {
   startAudioStream,
   stopAudioStream,
   addAudioSampleListener,
 } from '@loqalabs/loqa-audio-bridge';
+import { analyzeSpectrum } from '@loqalabs/loqa-audio-dsp';
 import type { EventSubscription } from 'expo-modules-core';
+import React, { useState, useEffect, useRef } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 
 export function SpectrumScreen() {
   const [isStreaming, setIsStreaming] = useState(false);
@@ -83,20 +83,20 @@ export function SpectrumScreen() {
           spectrumResult.centroid > 2000
             ? { label: 'Very Bright', color: '#F39C12' }
             : spectrumResult.centroid > 1000
-            ? { label: 'Bright', color: '#3498DB' }
-            : { label: 'Dark', color: '#9B59B6' },
+              ? { label: 'Bright', color: '#3498DB' }
+              : { label: 'Dark', color: '#9B59B6' },
         energy:
           spectrumResult.rolloff > 3000
             ? { label: 'High Energy', color: '#E74C3C' }
             : spectrumResult.rolloff > 1500
-            ? { label: 'Medium Energy', color: '#F39C12' }
-            : { label: 'Low Energy', color: '#27AE60' },
+              ? { label: 'Medium Energy', color: '#F39C12' }
+              : { label: 'Low Energy', color: '#27AE60' },
         timbre:
           spectrumResult.tilt > 0
             ? { label: 'Rising (Bright)', color: '#3498DB' }
             : spectrumResult.tilt < -0.5
-            ? { label: 'Falling (Muffled)', color: '#95A5A6' }
-            : { label: 'Flat (Balanced)', color: '#27AE60' },
+              ? { label: 'Falling (Muffled)', color: '#95A5A6' }
+              : { label: 'Flat (Balanced)', color: '#27AE60' },
       }
     : null;
 

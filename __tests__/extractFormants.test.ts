@@ -1,7 +1,9 @@
 // Comprehensive tests for extractFormants function
 import { describe, it, expect, jest, beforeEach } from '@jest/globals';
-import { extractFormants } from '../src/extractFormants';
+
+import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 import { ValidationError, NativeModuleError } from '../src/errors';
+import { extractFormants } from '../src/extractFormants';
 
 // Mock the native module
 jest.mock('../src/LoqaAudioDspModule', () => ({
@@ -15,8 +17,6 @@ jest.mock('../src/LoqaAudioDspModule', () => ({
 jest.mock('../src/utils', () => ({
   logDebug: jest.fn(),
 }));
-
-import LoqaAudioDspModule from '../src/LoqaAudioDspModule';
 
 /**
  * Helper function to generate synthetic vowel-like audio
