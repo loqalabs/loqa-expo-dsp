@@ -1,5 +1,9 @@
 # @loqalabs/loqa-audio-dsp
 
+[![npm version](https://img.shields.io/npm/v/@loqalabs/loqa-audio-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-audio-dsp)
+[![license](https://img.shields.io/npm/l/@loqalabs/loqa-audio-dsp.svg)](https://github.com/loqalabs/loqa-audio-dsp/blob/main/LICENSE)
+[![npm downloads](https://img.shields.io/npm/dm/@loqalabs/loqa-audio-dsp.svg)](https://www.npmjs.com/package/@loqalabs/loqa-audio-dsp)
+
 Production-grade Expo native module for audio DSP analysis.
 
 ## Overview
@@ -299,9 +303,5 @@ Contributions welcome! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guideli
 - **Documentation**: [GitHub Wiki](https://github.com/loqalabs/loqa-audio-dsp/wiki)
 
 ---
-
-**Status**: 🚧 Under Development
-
-This package is currently being developed to provide DSP functionality previously available in VoicelineDSP v0.2.0. Expected first release: v0.1.0 (Q1 2025).
 
 For real-time audio streaming capabilities, see [@loqalabs/loqa-audio-bridge](https://github.com/loqalabs/loqa-audio-bridge).
