@@ -27,12 +27,6 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      [
-        "@loqalabs/loqa-audio-dsp",
-        {}
-      ]
-    ]
+    }
   }
 }

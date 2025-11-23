@@ -1,10 +1,13 @@
 import React from 'react';
+
 import { NavigationContainer } from '@react-navigation/native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+
 import { FFTScreen } from './src/screens/FFTScreen';
 import { PitchScreen } from './src/screens/PitchScreen';
 import { FormantScreen } from './src/screens/FormantScreen';
 import { SpectrumScreen } from './src/screens/SpectrumScreen';
+import { BenchmarkScreen } from './src/screens/BenchmarkScreen';
 
 const Tab = createBottomTabNavigator();
 
@@ -57,6 +60,14 @@ export default function App() {
           options={{
             tabBarLabel: 'Spectrum',
             title: 'Spectral Analyzer',
+          }}
+        />
+        <Tab.Screen
+          name="Benchmark"
+          component={BenchmarkScreen}
+          options={{
+            tabBarLabel: 'Benchmark',
+            title: 'Performance Benchmarks',
           }}
         />
       </Tab.Navigator>
