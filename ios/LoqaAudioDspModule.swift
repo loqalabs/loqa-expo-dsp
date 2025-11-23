@@ -182,15 +182,12 @@ public class LoqaAudioDspModule: Module {
       }
     }
 
-    // MARK: - analyzeSpectrum (Placeholder for Epic 4)
-    // Will be fully implemented in Story 4.2 with actual Rust FFI calls
+    // MARK: - analyzeSpectrum (Implemented in Story 4.2)
+    // Calls Rust spectral analysis via RustBridge.analyzeSpectrumWrapper()
     AsyncFunction("analyzeSpectrum") { (buffer: [Float], sampleRate: Int, options: [String: Any], promise: Promise) in
       DispatchQueue.global(qos: .userInitiated).async {
         do {
-          // Placeholder implementation - returns zero values
-          // Story 4.2 will call RustBridge.analyzeSpectrumWrapper()
-
-          // Validate inputs
+          // Validate inputs (basic validation - detailed validation in RustBridge)
           guard !buffer.isEmpty else {
             promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
             return
@@ -201,15 +198,32 @@ public class LoqaAudioDspModule: Module {
             return
           }
 
-          // Placeholder: Return zero spectral features
+          // Call Rust spectral analysis via wrapper
+          let (centroid, rolloff, tilt) = try analyzeSpectrumWrapper(
+            buffer: buffer,
+            sampleRate: sampleRate
+          )
+
+          // Build result dictionary matching SpectrumResult type
           let result: [String: Any] = [
-            "centroid": 0.0,
-            "rolloff": 0.0,
-            "tilt": 0.0
+            "centroid": centroid,
+            "rolloff": rolloff,
+            "tilt": tilt
           ]
 
           promise.resolve(result)
+        } catch let error as RustFFIError {
+          // Handle Rust FFI errors with specific error codes
+          switch error {
+          case .invalidInput(let message):
+            promise.reject("VALIDATION_ERROR", message)
+          case .computationFailed(let message):
+            promise.reject("SPECTRUM_ERROR", message)
+          case .memoryAllocationFailed:
+            promise.reject("SPECTRUM_ERROR", "Memory allocation failed in Rust spectrum analysis")
+          }
         } catch {
+          // Handle unexpected errors
           promise.reject("SPECTRUM_ERROR", error.localizedDescription, error)
         }
       }

@@ -206,7 +206,7 @@ class LoqaAudioDspModule : Module() {
     /**
      * Analyzes spectral features (centroid, rolloff, tilt).
      *
-     * Placeholder implementation - will be completed in Story 4.2.
+     * Implemented in Story 4.2.
      * Expo automatically runs this on a background thread.
      *
      * @param buffer Audio samples as FloatArray
@@ -217,11 +217,27 @@ class LoqaAudioDspModule : Module() {
      */
     AsyncFunction("analyzeSpectrum") { buffer: FloatArray, sampleRate: Int, options: Map<String, Any?> ->
       try {
-        // Placeholder: This will call RustBridge.analyzeSpectrum in Story 4.2
-        throw UnsupportedOperationException(
-          "analyzeSpectrum not yet implemented. Will be completed in Story 4.2."
-        )
+        // Validate buffer is not empty (AC3)
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Validate sample rate (AC3)
+        if (sampleRate < 8000 || sampleRate > 48000) {
+          throw Exception("VALIDATION_ERROR: Sample rate must be between 8000 and 48000 Hz, got $sampleRate")
+        }
+
+        // Call Rust spectral analysis via JNI (AC1, AC2)
+        // JNI handles FloatArray marshalling automatically (AC5)
+        val result = RustBridge.analyzeSpectrum(buffer, sampleRate)
+
+        // Return result map with spectral features (AC4)
+        result
+      } catch (e: RuntimeException) {
+        // Catch JNI/Rust errors and throw with SPECTRUM_ERROR code (AC4)
+        throw Exception("SPECTRUM_ERROR: ${e.message}", e)
       } catch (e: Exception) {
+        // Catch validation errors and other unexpected errors (AC4)
         throw Exception("SPECTRUM_ERROR: ${e.message}", e)
       }
     }
