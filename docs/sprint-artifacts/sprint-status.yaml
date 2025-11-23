@@ -76,7 +76,7 @@ development_status:
   epic-5: backlog
   5-1-create-comprehensive-readme-md: done
   5-2-create-api-md-reference-documentation: done
-  5-3-create-integration-guide-md-with-common-patterns: ready-for-dev
+  5-3-create-integration-guide-md-with-common-patterns: done
   5-4-build-example-app-with-all-four-dsp-functions: ready-for-dev
   5-5-add-performance-benchmarking-to-example-app: ready-for-dev
   5-6-finalize-package-json-and-publishing-configuration: ready-for-dev
