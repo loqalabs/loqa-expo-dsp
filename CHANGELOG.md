@@ -5,6 +5,18 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.7] - 2025-11-23
+
+### Fixed
+
+- **Critical**: Rebuild Rust XCFramework with all FFI functions exported
+  - Rebuilt iOS XCFramework to include all `*_rust` FFI function symbols
+  - Previous XCFramework was missing `analyze_spectrum_rust`, `detect_pitch_rust`, and `extract_formants_rust` symbols
+  - XCFramework was built from outdated Rust code before FFI functions were implemented
+  - Now exports all required symbols: `compute_fft_rust`, `free_fft_result_rust`, `detect_pitch_rust`, `extract_formants_rust`, `analyze_spectrum_rust`
+  - Fixes linker error: "Undefined symbols for architecture arm64: _analyze_spectrum_rust"
+  - iOS build now links successfully
+
 ## [0.1.6] - 2025-11-23
 
 ### Fixed
@@ -133,6 +145,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.1.7]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.7
 [0.1.6]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.6
 [0.1.5]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.5
 [0.1.4]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.4
