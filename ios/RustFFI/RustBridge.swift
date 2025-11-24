@@ -67,19 +67,23 @@ func extract_formants_rust(
 
 // MARK: Spectrum Analysis Functions (Epic 4)
 
-/// Placeholder FFI declaration for spectral analysis
-/// Will be implemented in Story 4.2
+/// SpectrumResult struct matching Rust #[repr(C)] layout
+/// Returned by value from analyze_spectrum_rust
+public struct SpectrumResult {
+    public let centroid: Float
+    public let rolloff: Float
+    public let tilt: Float
+}
+
+/// FFI declaration for spectral analysis
+/// Implemented in Story 4.2, called from Story 4.2
+/// Note: Rust returns SpectrumResult by value (small struct, no heap allocation needed)
 @_silgen_name("analyze_spectrum_rust")
 func analyze_spectrum_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
     _ sampleRate: Int32
-) -> UnsafePointer<Float>? // Returns [centroid, rolloff, tilt]
-
-/// Placeholder FFI declaration for freeing spectrum analysis result memory
-/// Will be implemented in Story 4.2
-@_silgen_name("free_spectrum_result_rust")
-func free_spectrum_result_rust(_ ptr: UnsafePointer<Float>)
+) -> SpectrumResult
 
 // MARK: - Swift Wrapper Functions
 // These functions provide memory-safe wrappers around the Rust FFI calls
@@ -240,11 +244,11 @@ public func extractFormantsWrapper(
     )
 }
 
-// MARK: Spectrum Analysis Wrapper (Placeholder for Epic 4)
+// MARK: Spectrum Analysis Wrapper (Epic 4)
 
-/// Placeholder Swift wrapper for spectrum analysis
-/// MEMORY SAFETY PATTERN: Uses defer block to guarantee Rust memory is freed
-/// Will be fully implemented in Story 4.2
+/// Swift wrapper for spectral analysis
+/// MEMORY SAFETY: SpectrumResult returned by value (no heap allocation, no cleanup needed)
+/// Implemented in Story 4.2
 public func analyzeSpectrumWrapper(
     buffer: [Float],
     sampleRate: Int
@@ -258,38 +262,24 @@ public func analyzeSpectrumWrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    var rustResult: UnsafePointer<Float>? = nil
-
-    // CRITICAL: defer block guarantees Rust memory is freed
-    defer {
-        if let ptr = rustResult {
-            free_spectrum_result_rust(ptr)
-        }
-    }
-
-    buffer.withUnsafeBufferPointer { bufferPtr in
+    // Call Rust function - returns SpectrumResult by value (no memory management needed)
+    let result = buffer.withUnsafeBufferPointer { bufferPtr -> SpectrumResult in
         guard let baseAddress = bufferPtr.baseAddress else {
-            return
+            // Return error result if buffer pointer is invalid
+            return SpectrumResult(centroid: 0.0, rolloff: 0.0, tilt: 0.0)
         }
 
-        rustResult = analyze_spectrum_rust(
+        return analyze_spectrum_rust(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate)
         )
     }
 
-    guard let result = rustResult else {
-        throw RustFFIError.computationFailed("Spectrum analysis returned null")
-    }
-
-    // Copy result: [centroid, rolloff, tilt]
-    let resultArray = Array(UnsafeBufferPointer(start: result, count: 3))
-
     return (
-        centroid: resultArray[0],
-        rolloff: resultArray[1],
-        tilt: resultArray[2]
+        centroid: result.centroid,
+        rolloff: result.rolloff,
+        tilt: result.tilt
     )
 }
 

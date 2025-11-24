@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.9] - 2025-11-23
+
+### Fixed
+
+- **Critical**: Fix Swift FFI declaration for `analyze_spectrum_rust` to match Rust implementation
+  - Changed FFI declaration from pointer return (`UnsafePointer<Float>?`) to struct return (`SpectrumResult`)
+  - Rust implementation returns `SpectrumResult` by value (like `PitchResult` and `FormantsResult`), not a heap-allocated pointer
+  - Removed incorrect `free_spectrum_result_rust` FFI declaration (function doesn't exist in Rust)
+  - Updated `analyzeSpectrumWrapper` to handle struct return (no memory management needed)
+  - Swift FFI declarations were outdated placeholders that didn't match the actual Rust implementation
+  - Fixes linker error: "Undefined symbol: _free_spectrum_result_rust"
+  - All four DSP functions now work correctly with proper memory semantics
+
 ## [0.1.8] - 2025-11-23
 
 ### Fixed
@@ -158,6 +171,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.1.9]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.9
 [0.1.8]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.8
 [0.1.7]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.7
 [0.1.6]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.6
