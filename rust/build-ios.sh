@@ -49,6 +49,10 @@ echo "Renaming simulator binary for CocoaPods compatibility..."
 mv "$OUTPUT_DIR/LoqaVoiceDSP.xcframework/ios-arm64_x86_64-simulator/libloqa_voice_dsp_universal_sim.a" \
    "$OUTPUT_DIR/LoqaVoiceDSP.xcframework/ios-arm64_x86_64-simulator/libloqa_voice_dsp.a"
 
+# Update Info.plist to reference correct binary name
+echo "Updating XCFramework Info.plist..."
+sed -i '' 's/libloqa_voice_dsp_universal_sim\.a/libloqa_voice_dsp.a/g' "$OUTPUT_DIR/LoqaVoiceDSP.xcframework/Info.plist"
+
 echo "✅ iOS library built successfully"
 echo "  XCFramework: $OUTPUT_DIR/LoqaVoiceDSP.xcframework"
 

@@ -5,6 +5,19 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.1.8] - 2025-11-23
+
+### Fixed
+
+- **Critical**: Fix XCFramework Info.plist to reference correct binary name
+  - Updated Info.plist to reference `libloqa_voice_dsp.a` instead of `libloqa_voice_dsp_universal_sim.a`
+  - v0.1.7 physically renamed the simulator binary but didn't update the Info.plist
+  - This caused CocoaPods to fail with "contains static libraries with differing binary names"
+  - Regression of v0.1.2 issue - XCFramework rebuild didn't update Info.plist
+  - Updated build script to automatically update Info.plist after renaming binary
+  - Fixes pod install error: "differing binary names: libloqa_voice_dsp and libloqa_voice_dsp_universal_sim"
+  - Pod install now succeeds, iOS build can proceed
+
 ## [0.1.7] - 2025-11-23
 
 ### Fixed
@@ -145,6 +158,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+[0.1.8]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.8
 [0.1.7]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.7
 [0.1.6]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.6
 [0.1.5]: https://github.com/loqalabs/loqa-audio-dsp/releases/tag/v0.1.5
