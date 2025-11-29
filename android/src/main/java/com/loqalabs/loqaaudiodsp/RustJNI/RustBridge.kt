@@ -24,6 +24,35 @@ data class FormantsResult(
 )
 
 /**
+ * HNRResult data class matching Rust #[repr(C)] HNRResult struct.
+ * Returned by value from nativeCalculateHNR JNI function.
+ *
+ * HNR (Harmonics-to-Noise Ratio) measures the ratio of harmonic to noise energy:
+ * - Higher HNR (18-25 dB): Clear, less breathy voice
+ * - Lower HNR (12-18 dB): Softer, more breathy voice
+ */
+data class HNRResult(
+    val hnr: Float,
+    val f0: Float,
+    val isVoiced: Boolean
+)
+
+/**
+ * H1H2Result data class matching Rust #[repr(C)] H1H2Result struct.
+ * Returned by value from nativeCalculateH1H2 JNI function.
+ *
+ * H1-H2 measures the difference between first and second harmonic amplitudes:
+ * - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
+ * - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
+ */
+data class H1H2Result(
+    val h1h2: Float,
+    val h1AmplitudeDb: Float,
+    val h2AmplitudeDb: Float,
+    val f0: Float
+)
+
+/**
  * RustBridge provides JNI bindings to the Rust loqa-voice-dsp library.
  *
  * This class handles:
@@ -132,6 +161,48 @@ object RustBridge {
         sampleRate: Int
     ): Map<String, Any>
 
+    /**
+     * JNI native function for HNR (Harmonics-to-Noise Ratio) calculation.
+     *
+     * Maps to Rust function:
+     * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateHNR
+     *
+     * This external function is resolved by JNI to the Rust implementation in lib.rs.
+     * The Rust function uses Boersma's autocorrelation method for HNR calculation.
+     *
+     * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param minFreq Minimum F0 frequency to search (typically 75 Hz)
+     * @param maxFreq Maximum F0 frequency to search (typically 500 Hz)
+     * @return HNRResult struct with hnr (dB), f0 (Hz), and isVoiced flag
+     */
+    external fun nativeCalculateHNR(
+        buffer: FloatArray,
+        sampleRate: Int,
+        minFreq: Float,
+        maxFreq: Float
+    ): HNRResult
+
+    /**
+     * JNI native function for H1-H2 amplitude difference calculation.
+     *
+     * Maps to Rust function:
+     * Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateH1H2
+     *
+     * This external function is resolved by JNI to the Rust implementation in lib.rs.
+     * H1-H2 measures the difference between first and second harmonic amplitudes.
+     *
+     * @param buffer Input audio samples as FloatArray (JNI auto-converts to *const f32)
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param f0 Fundamental frequency in Hz, or 0.0 to auto-detect
+     * @return H1H2Result struct with h1h2, h1AmplitudeDb, h2AmplitudeDb, and f0
+     */
+    external fun nativeCalculateH1H2(
+        buffer: FloatArray,
+        sampleRate: Int,
+        f0: Float
+    ): H1H2Result
+
     // ============================================================================
     // Kotlin Wrapper Functions with Error Handling
     // ============================================================================
@@ -217,6 +288,58 @@ object RustBridge {
             nativeAnalyzeSpectrum(buffer, sampleRate)
         } catch (e: Exception) {
             throw RuntimeException("JNI call to nativeAnalyzeSpectrum failed", e)
+        }
+    }
+
+    /**
+     * Calculates HNR (Harmonics-to-Noise Ratio) with error handling.
+     *
+     * HNR measures the ratio of harmonic to noise energy in voice:
+     * - Higher HNR (18-25 dB): Clear, less breathy voice
+     * - Lower HNR (12-18 dB): Softer, more breathy voice
+     *
+     * @param buffer Input audio samples
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param minFreq Minimum F0 frequency to search (default: 75 Hz)
+     * @param maxFreq Maximum F0 frequency to search (default: 500 Hz)
+     * @return HNRResult with hnr (dB), f0 (Hz), and isVoiced flag
+     * @throws RuntimeException if JNI call fails
+     */
+    fun calculateHNR(
+        buffer: FloatArray,
+        sampleRate: Int,
+        minFreq: Float = 75.0f,
+        maxFreq: Float = 500.0f
+    ): HNRResult {
+        return try {
+            nativeCalculateHNR(buffer, sampleRate, minFreq, maxFreq)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeCalculateHNR failed", e)
+        }
+    }
+
+    /**
+     * Calculates H1-H2 amplitude difference with error handling.
+     *
+     * H1-H2 measures the difference between first and second harmonic amplitudes:
+     * - Higher H1-H2 (>5 dB): Lighter, breathier vocal quality
+     * - Lower H1-H2 (<0 dB): Fuller, heavier vocal quality
+     *
+     * @param buffer Input audio samples
+     * @param sampleRate Sample rate in Hz (8000-48000)
+     * @param f0 Fundamental frequency in Hz, or 0.0 to auto-detect
+     * @return H1H2Result with h1h2, h1AmplitudeDb, h2AmplitudeDb, and f0
+     * @throws RuntimeException if JNI call fails
+     */
+    fun calculateH1H2(
+        buffer: FloatArray,
+        sampleRate: Int,
+        f0: Float = 0.0f
+    ): H1H2Result {
+        return try {
+            nativeCalculateH1H2(buffer, sampleRate, f0)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeCalculateH1H2 failed", e)
         }
     }
 }

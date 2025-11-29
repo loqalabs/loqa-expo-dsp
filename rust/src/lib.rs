@@ -889,6 +889,90 @@ pub unsafe extern "C" fn calculate_h1h2_rust(
     }
 }
 
+/// Android JNI native method for calculateHNR
+///
+/// JNI Method Signature Resolution:
+/// - Kotlin declaration: `external fun nativeCalculateHNR(buffer: FloatArray, sampleRate: Int, minFreq: Float, maxFreq: Float): HNRResult`
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
+/// - Class: RustBridge (object)
+/// - Method: nativeCalculateHNR
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateHNR
+///
+/// # Arguments
+/// * `env` - JNI environment pointer (unused but required by JNI)
+/// * `class` - JNI class reference (unused but required by JNI)
+/// * `buffer` - JNI jfloatArray reference to input audio samples
+/// * `buffer_length` - Number of samples in buffer
+/// * `sample_rate` - Sample rate in Hz (8000-48000)
+/// * `min_freq` - Minimum F0 frequency to search (typically 75 Hz)
+/// * `max_freq` - Maximum F0 frequency to search (typically 500 Hz)
+///
+/// # Returns
+/// * HNRResult struct with hnr (dB), f0 (Hz), and is_voiced flag
+///
+/// # Safety
+/// * JNI framework ensures proper type conversions and memory management
+/// * This function is called from Kotlin via JNI, not directly
+///
+/// # Note
+/// HNRResult is returned by value (small struct), not by pointer.
+/// JNI will automatically marshal this back to Kotlin data class.
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateHNR(
+    _env: *mut std::os::raw::c_void,
+    _class: *mut std::os::raw::c_void,
+    buffer: *const c_float,
+    buffer_length: c_int,
+    sample_rate: c_int,
+    min_freq: c_float,
+    max_freq: c_float,
+) -> HNRResult {
+    // Delegate to the main HNR implementation
+    // The JNI framework handles conversion of FloatArray to *const f32
+    calculate_hnr_rust(buffer, buffer_length, sample_rate, min_freq, max_freq)
+}
+
+/// Android JNI native method for calculateH1H2
+///
+/// JNI Method Signature Resolution:
+/// - Kotlin declaration: `external fun nativeCalculateH1H2(buffer: FloatArray, sampleRate: Int, f0: Float): H1H2Result`
+/// - Package: com.loqalabs.loqaexpodsp.RustJNI
+/// - Class: RustBridge (object)
+/// - Method: nativeCalculateH1H2
+/// - JNI Function Name: Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateH1H2
+///
+/// # Arguments
+/// * `env` - JNI environment pointer (unused but required by JNI)
+/// * `class` - JNI class reference (unused but required by JNI)
+/// * `buffer` - JNI jfloatArray reference to input audio samples
+/// * `buffer_length` - Number of samples in buffer
+/// * `sample_rate` - Sample rate in Hz (8000-48000)
+/// * `f0` - Fundamental frequency in Hz, or 0.0 to auto-detect
+///
+/// # Returns
+/// * H1H2Result struct with h1h2, h1_amplitude_db, h2_amplitude_db, and f0
+///
+/// # Safety
+/// * JNI framework ensures proper type conversions and memory management
+/// * This function is called from Kotlin via JNI, not directly
+///
+/// # Note
+/// H1H2Result is returned by value (small struct), not by pointer.
+/// JNI will automatically marshal this back to Kotlin data class.
+#[no_mangle]
+pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_nativeCalculateH1H2(
+    _env: *mut std::os::raw::c_void,
+    _class: *mut std::os::raw::c_void,
+    buffer: *const c_float,
+    buffer_length: c_int,
+    sample_rate: c_int,
+    f0: c_float,
+) -> H1H2Result {
+    // Delegate to the main H1-H2 implementation
+    // The JNI framework handles conversion of FloatArray to *const f32
+    calculate_h1h2_rust(buffer, buffer_length, sample_rate, f0)
+}
+
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)
 #[no_mangle]
 pub extern "C" fn test_ffi_bridge() -> i32 {

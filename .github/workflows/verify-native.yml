@@ -1,0 +1,75 @@
+name: Verify Native Symbols
+
+on:
+  push:
+    branches: ['**']
+    paths:
+      - 'rust/**'
+      - 'ios/RustFFI/**'
+      - 'android/src/main/java/**/RustBridge.kt'
+      - 'android/src/main/jniLibs/**'
+      - 'scripts/verify-*.sh'
+      - '.github/workflows/verify-native.yml'
+  pull_request:
+    branches: ['**']
+    paths:
+      - 'rust/**'
+      - 'ios/RustFFI/**'
+      - 'android/src/main/java/**/RustBridge.kt'
+      - 'android/src/main/jniLibs/**'
+      - 'scripts/verify-*.sh'
+      - '.github/workflows/verify-native.yml'
+  # Allow manual trigger for debugging
+  workflow_dispatch:
+
+jobs:
+  verify-ios-symbols:
+    name: Verify iOS FFI Symbols
+    runs-on: macos-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify iOS symbols
+        run: |
+          echo "Verifying iOS FFI symbols match XCFramework exports..."
+          ./scripts/verify-ios-symbols.sh
+
+  verify-android-symbols:
+    name: Verify Android JNI Symbols
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install binutils for nm
+        run: sudo apt-get update && sudo apt-get install -y binutils
+
+      - name: Verify Android symbols
+        run: |
+          echo "Verifying Android JNI symbols match .so exports..."
+          ./scripts/verify-android-symbols.sh
+
+  # This job runs on release tags to ensure native builds are complete
+  pre-release-verification:
+    name: Pre-Release Native Verification
+    runs-on: macos-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Verify all native symbols
+        run: |
+          echo "=== Pre-Release Native Symbol Verification ==="
+          echo ""
+          echo "Verifying iOS FFI symbols..."
+          ./scripts/verify-ios-symbols.sh
+          echo ""
+          echo "Verifying Android JNI symbols..."
+          ./scripts/verify-android-symbols.sh
+          echo ""
+          echo "=== All native symbols verified ==="
