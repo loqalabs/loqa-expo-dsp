@@ -1,6 +1,6 @@
 {
   "name": "@loqalabs/loqa-expo-dsp",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Production-grade Expo native module wrapping loqa-voice-dsp for audio DSP analysis (FFT, pitch detection, formants, HNR, H1-H2)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
