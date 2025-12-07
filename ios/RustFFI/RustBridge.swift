@@ -1,14 +1,17 @@
 import Foundation
 
 // MARK: - FFI Function Declarations
-// These functions use @_silgen_name to bind to Rust functions exported by loqa-voice-dsp
+// These functions use @_extern(c) to bind to Rust extern "C" functions with C ABI
+// IMPORTANT: @_extern(c) is required for correct struct return value handling on ARM64
+// Using @_silgen_name would cause ABI mismatch (Swift ABI vs C ABI)
 // NOTE: Actual Rust function implementations will be added in Epic 2 (FFT), Epic 3 (Pitch/Formants), and Epic 4 (Spectrum)
 
 // MARK: FFT Functions (Epic 2)
 
 /// FFI declaration for FFT computation with window type support
 /// Implemented in Story 2.1, called from Story 2.2
-@_silgen_name("compute_fft_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "compute_fft_rust")
 func compute_fft_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
@@ -16,9 +19,10 @@ func compute_fft_rust(
     _ windowType: Int32
 ) -> UnsafePointer<Float>?
 
-/// Placeholder FFI declaration for freeing FFT result memory
-/// Will be implemented in Story 2.2
-@_silgen_name("free_fft_result_rust")
+/// FFI declaration for freeing FFT result memory
+/// Implemented in Story 2.2
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "free_fft_result_rust")
 func free_fft_result_rust(_ ptr: UnsafePointer<Float>)
 
 // MARK: Pitch Detection Functions (Epic 3)
@@ -34,7 +38,8 @@ public struct PitchResult {
 /// FFI declaration for pitch detection using YIN algorithm
 /// Implemented in Story 3.1, called from Story 3.3
 /// Note: Rust returns PitchResult by value (small struct, no heap allocation needed)
-@_silgen_name("detect_pitch_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "detect_pitch_rust")
 func detect_pitch_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
@@ -57,7 +62,8 @@ public struct FormantsResult {
 /// FFI declaration for formant extraction using LPC analysis
 /// Implemented in Story 3.2, called from Story 3.3
 /// Note: Rust returns FormantsResult by value (small struct, no heap allocation needed)
-@_silgen_name("extract_formants_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "extract_formants_rust")
 func extract_formants_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
@@ -78,7 +84,8 @@ public struct SpectrumResult {
 /// FFI declaration for spectral analysis
 /// Implemented in Story 4.2, called from Story 4.2
 /// Note: Rust returns SpectrumResult by value (small struct, no heap allocation needed)
-@_silgen_name("analyze_spectrum_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "analyze_spectrum_rust")
 func analyze_spectrum_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
@@ -97,7 +104,8 @@ public struct HNRResult {
 
 /// FFI declaration for HNR calculation using Boersma's autocorrelation method
 /// Note: Rust returns HNRResult by value (small struct, no heap allocation needed)
-@_silgen_name("calculate_hnr_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "calculate_hnr_rust")
 func calculate_hnr_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,
@@ -119,7 +127,8 @@ public struct H1H2Result {
 
 /// FFI declaration for H1-H2 calculation for vocal weight analysis
 /// Note: Rust returns H1H2Result by value (small struct, no heap allocation needed)
-@_silgen_name("calculate_h1h2_rust")
+/// IMPORTANT: Using @_extern(c) for C ABI compatibility with Rust extern "C" functions
+@_extern(c, "calculate_h1h2_rust")
 func calculate_h1h2_rust(
     _ buffer: UnsafePointer<Float>,
     _ length: Int32,

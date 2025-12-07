@@ -5,18 +5,18 @@
  * for debugging and error handling.
  */
 export declare class LoqaExpoDspError extends Error {
-  code: string;
-  details?: Record<string, unknown> | undefined;
-  /**
-   * Creates a new LoqaExpoDspError
-   * @param message - Human-readable error message
-   * @param code - Error code for programmatic error handling
-   * @param details - Additional error details (optional)
-   */
-  constructor(message: string, code: string, details?: Record<string, unknown> | undefined);
+    code: string;
+    details?: Record<string, unknown> | undefined;
+    /**
+     * Creates a new LoqaExpoDspError
+     * @param message - Human-readable error message
+     * @param code - Error code for programmatic error handling
+     * @param details - Additional error details (optional)
+     */
+    constructor(message: string, code: string, details?: Record<string, unknown> | undefined);
 }
 /** @deprecated Use LoqaExpoDspError instead */
-export declare const LoqaExpoDspError: typeof LoqaExpoDspError;
+export declare const LoqaAudioDspError: typeof LoqaExpoDspError;
 /**
  * Error thrown when input validation fails
  *
@@ -24,12 +24,12 @@ export declare const LoqaExpoDspError: typeof LoqaExpoDspError;
  * required constraints (e.g., buffer size, sample rate range, FFT size).
  */
 export declare class ValidationError extends LoqaExpoDspError {
-  /**
-   * Creates a new ValidationError
-   * @param message - Description of the validation failure
-   * @param details - Additional context (e.g., invalid values, expected ranges)
-   */
-  constructor(message: string, details?: Record<string, unknown>);
+    /**
+     * Creates a new ValidationError
+     * @param message - Description of the validation failure
+     * @param details - Additional context (e.g., invalid values, expected ranges)
+     */
+    constructor(message: string, details?: Record<string, unknown>);
 }
 /**
  * Error thrown when native module operations fail
@@ -38,11 +38,11 @@ export declare class ValidationError extends LoqaExpoDspError {
  * providing context about the failure and suggestions for resolution.
  */
 export declare class NativeModuleError extends LoqaExpoDspError {
-  /**
-   * Creates a new NativeModuleError
-   * @param message - Description of the native module failure
-   * @param details - Additional context (e.g., original native error)
-   */
-  constructor(message: string, details?: Record<string, unknown>);
+    /**
+     * Creates a new NativeModuleError
+     * @param message - Description of the native module failure
+     * @param details - Additional context (e.g., original native error)
+     */
+    constructor(message: string, details?: Record<string, unknown>);
 }
 //# sourceMappingURL=errors.d.ts.map

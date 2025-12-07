@@ -1,24 +1,7 @@
 export { default as LoqaExpoDspModule } from './LoqaExpoDspModule';
-export type {
-  FFTOptions,
-  FFTResult,
-  PitchDetectionOptions,
-  PitchResult,
-  FormantExtractionOptions,
-  FormantsResult,
-  SpectrumAnalysisOptions,
-  SpectrumResult,
-  HNROptions,
-  HNRResult,
-  H1H2Options,
-  H1H2Result,
-} from './types';
-export {
-  LoqaExpoDspError,
-  LoqaExpoDspError, // @deprecated alias for backwards compatibility
-  ValidationError,
-  NativeModuleError,
-} from './errors';
+export type { FFTOptions, FFTResult, PitchDetectionOptions, PitchResult, FormantExtractionOptions, FormantsResult, SpectrumAnalysisOptions, SpectrumResult, HNROptions, HNRResult, H1H2Options, H1H2Result, } from './types';
+export { LoqaExpoDspError, LoqaAudioDspError, // @deprecated alias for backwards compatibility
+ValidationError, NativeModuleError, } from './errors';
 export { logDebug, logWarning } from './utils';
 export { computeFFT } from './computeFFT';
 export { detectPitch } from './detectPitch';

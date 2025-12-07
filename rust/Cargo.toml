@@ -10,7 +10,7 @@ crate-type = ["staticlib", "cdylib"]
 [dependencies]
 # loqa-voice-dsp dependency declaration (AC1 requirement)
 # Core DSP library for voice analysis (pitch, formants, spectral features)
-loqa-voice-dsp = "0.2"
+loqa-voice-dsp = "0.2.1"
 
 [profile.release]
 opt-level = 3
