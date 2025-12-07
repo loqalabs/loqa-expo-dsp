@@ -1,6 +1,6 @@
 {
   "name": "@loqalabs/loqa-expo-dsp",
-  "version": "0.2.7",
+  "version": "0.2.8",
   "description": "Production-grade Expo native module wrapping loqa-voice-dsp for audio DSP analysis (FFT, pitch detection, formants, HNR, H1-H2)",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -29,9 +29,10 @@
     "verify:ios-symbols": "./scripts/verify-ios-symbols.sh",
     "verify:android-symbols": "./scripts/verify-android-symbols.sh",
     "verify:native-symbols": "npm run verify:ios-symbols && npm run verify:android-symbols",
+    "verify:swift": "./scripts/swift-compile-check.sh",
     "validate:structure": "./scripts/validate-module-structure.sh",
     "prepare": "expo-module prepare",
-    "prepublishOnly": "npm run build",
+    "prepublishOnly": "npm run build && npm run verify:swift",
     "expo-module": "expo-module"
   },
   "keywords": [

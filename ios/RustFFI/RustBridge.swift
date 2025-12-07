@@ -318,10 +318,11 @@ public func calculateHNRWrapper(
 
 /// Swift wrapper for H1-H2 calculation
 /// MEMORY SAFETY: H1H2Result returned by value (no heap allocation, no cleanup needed)
+/// f0: Pass nil or 0 for auto-detection, or provide known fundamental frequency
 public func calculateH1H2Wrapper(
     buffer: [Float],
     sampleRate: Int,
-    f0: Float
+    f0: Float?
 ) throws -> (h1h2: Float, h1AmplitudeDb: Float, h2AmplitudeDb: Float, f0: Float) {
     // Input validation
     guard !buffer.isEmpty else {
@@ -332,9 +333,8 @@ public func calculateH1H2Wrapper(
         throw RustFFIError.invalidInput("Sample rate must be between 8000 and 48000 Hz")
     }
 
-    guard f0 > 0 else {
-        throw RustFFIError.invalidInput("F0 must be positive")
-    }
+    // Use 0 to signal auto-detection to Rust, or use provided f0
+    let f0Value = f0 ?? 0.0
 
     // Call Rust function - returns H1H2ResultC by value
     let cResult = buffer.withUnsafeBufferPointer { bufferPtr -> H1H2ResultC in
@@ -346,7 +346,7 @@ public func calculateH1H2Wrapper(
             baseAddress,
             Int32(buffer.count),
             Int32(sampleRate),
-            f0
+            f0Value
         )
     }
 
