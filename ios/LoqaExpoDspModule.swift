@@ -244,8 +244,8 @@ public class LoqaExpoDspModule: Module {
         let (hnr, f0, isVoiced) = try calculateHNRWrapper(
           buffer: buffer,
           sampleRate: sampleRate,
-          minFreq: minFreq,
-          maxFreq: maxFreq
+          minFrequency: minFreq,
+          maxFrequency: maxFreq
         )
 
         // Build result dictionary matching HNRResult type
