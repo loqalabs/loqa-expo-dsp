@@ -141,10 +141,10 @@ public class LoqaExpoDspModule: Module {
         }
 
         // Call Rust formant extraction via wrapper
-        let (f1, f2, f3, bandwidths) = try extractFormantsWrapper(
+        let (f1, f2, f3, bw1, bw2, bw3) = try extractFormantsWrapper(
           buffer: buffer,
           sampleRate: sampleRate,
-          lpcOrder: lpcOrder
+          lpcOrder: lpcOrder ?? 12
         )
 
         // Build result dictionary matching FormantsResult type
@@ -153,9 +153,9 @@ public class LoqaExpoDspModule: Module {
           "f2": f2,
           "f3": f3,
           "bandwidths": [
-            "f1": bandwidths.0,
-            "f2": bandwidths.1,
-            "f3": bandwidths.2
+            "f1": bw1,
+            "f2": bw2,
+            "f3": bw3
           ]
         ]
 
