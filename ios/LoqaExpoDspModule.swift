@@ -48,7 +48,7 @@ public class LoqaExpoDspModule: Module {
         }
 
         // Call Rust FFT function via wrapper
-        let magnitude = try computeFFTWrapper(buffer: buffer, fftSize: fftSize, windowType: windowType)
+        let magnitude = try computeFFTWrapper(buffer: buffer, fftSize: fftSize, windowType: Int(windowType))
 
         // Build frequency array: freq[i] = (sampleRate / fftSize) * i
         let frequencies = (0..<magnitude.count).map { Float(sampleRate / Double(fftSize) * Double($0)) }
