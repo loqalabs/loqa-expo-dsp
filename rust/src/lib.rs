@@ -973,6 +973,147 @@ pub unsafe extern "C" fn Java_com_loqalabs_loqaexpodsp_RustJNI_RustBridge_native
     calculate_h1h2_rust(buffer, buffer_length, sample_rate, f0)
 }
 
+// ============================================================================
+// VoiceAnalyzer process_buffer FFI - HMM-smoothed pitch tracking (v0.5.0)
+// ============================================================================
+
+/// C-compatible PitchTrack result from Viterbi decoding
+///
+/// Contains smoothed pitch track, voiced probabilities, and timestamps.
+/// Arrays are heap-allocated and owned by caller after return.
+/// Caller MUST call `loqa_free_pitch_track` to prevent memory leaks.
+#[repr(C)]
+#[derive(Debug)]
+pub struct PitchTrackFFI {
+    /// True if processing succeeded
+    pub success: bool,
+    /// Pointer to pitch estimates array (Hz, 0.0 = unvoiced)
+    pub pitch_track_ptr: *mut c_float,
+    /// Pointer to voiced probabilities array [0.0, 1.0]
+    pub voiced_probs_ptr: *mut c_float,
+    /// Pointer to timestamps array (seconds from buffer start)
+    pub timestamps_ptr: *mut c_float,
+    /// Number of frames (length of all three arrays)
+    pub length: usize,
+}
+
+/// Process audio buffer with HMM-smoothed Viterbi decoding
+///
+/// Unlike `process_stream` which treats frames independently, this method uses
+/// Viterbi decoding to find the globally optimal pitch track across all frames,
+/// reducing octave errors (from ~8-12% to ≤3%) and producing smoother contours.
+///
+/// This is best suited for offline analysis of complete utterances
+/// (typically < 60 seconds). For longer recordings, segment into utterances first.
+///
+/// **Note:** Always uses pYIN algorithm regardless of config settings, since
+/// HMM smoothing requires the probabilistic candidates that only pYIN provides.
+///
+/// # Arguments
+/// * `analyzer` - Pointer to VoiceAnalyzer from `loqa_voice_analyzer_new`
+/// * `samples` - Pointer to audio samples (Float32 array)
+/// * `len` - Number of samples in buffer
+///
+/// # Returns
+/// * PitchTrackFFI with success=true and allocated arrays if processing succeeded
+/// * Caller MUST call `loqa_free_pitch_track` to deallocate arrays
+///
+/// # Safety
+/// * `analyzer` must be a valid pointer from `loqa_voice_analyzer_new`
+/// * `samples` must point to valid f32 array of length `len`
+/// * Caller MUST call `loqa_free_pitch_track` to avoid memory leaks
+#[no_mangle]
+pub unsafe extern "C" fn loqa_voice_analyzer_process_buffer(
+    analyzer: *mut std::ffi::c_void,
+    samples: *const c_float,
+    len: usize,
+) -> PitchTrackFFI {
+    // Error result helper
+    let error_result = PitchTrackFFI {
+        success: false,
+        pitch_track_ptr: std::ptr::null_mut(),
+        voiced_probs_ptr: std::ptr::null_mut(),
+        timestamps_ptr: std::ptr::null_mut(),
+        length: 0,
+    };
+
+    // Null pointer checks
+    if analyzer.is_null() {
+        eprintln!("[Rust FFI] Error: analyzer pointer is null");
+        return error_result;
+    }
+
+    if samples.is_null() || len == 0 {
+        eprintln!("[Rust FFI] Error: samples pointer is null or length is 0");
+        return error_result;
+    }
+
+    // Cast back to VoiceAnalyzer
+    let analyzer_ref = &mut *(analyzer as *mut loqa_voice_dsp::VoiceAnalyzer);
+    let samples_slice = slice::from_raw_parts(samples, len);
+
+    // Call process_buffer for Viterbi-smoothed pitch track
+    match analyzer_ref.process_buffer(samples_slice) {
+        Ok(track) => {
+            let frame_count = track.pitch_track.len();
+
+            // Allocate C-compatible arrays
+            let mut pitch_vec = track.pitch_track.into_boxed_slice();
+            let mut probs_vec = track.voiced_probabilities.into_boxed_slice();
+            let mut times_vec = track.timestamps.into_boxed_slice();
+
+            let pitch_ptr = pitch_vec.as_mut_ptr();
+            let probs_ptr = probs_vec.as_mut_ptr();
+            let times_ptr = times_vec.as_mut_ptr();
+
+            // Prevent Rust from freeing the memory (caller will free via loqa_free_pitch_track)
+            std::mem::forget(pitch_vec);
+            std::mem::forget(probs_vec);
+            std::mem::forget(times_vec);
+
+            PitchTrackFFI {
+                success: true,
+                pitch_track_ptr: pitch_ptr,
+                voiced_probs_ptr: probs_ptr,
+                timestamps_ptr: times_ptr,
+                length: frame_count,
+            }
+        }
+        Err(e) => {
+            eprintln!("[Rust FFI] process_buffer failed: {e}");
+            error_result
+        }
+    }
+}
+
+/// Free PitchTrackFFI arrays allocated by `loqa_voice_analyzer_process_buffer`
+///
+/// # Safety
+/// * `result` must point to valid PitchTrackFFI from `loqa_voice_analyzer_process_buffer`
+/// * Must be called exactly once per successful `loqa_voice_analyzer_process_buffer` call
+/// * After calling this, the pointers in `result` are invalid
+#[no_mangle]
+pub unsafe extern "C" fn loqa_free_pitch_track(result: *mut PitchTrackFFI) {
+    if result.is_null() {
+        return;
+    }
+
+    let res = &*result;
+
+    // Free each array if non-null
+    if !res.pitch_track_ptr.is_null() && res.length > 0 {
+        let _ = Box::from_raw(slice::from_raw_parts_mut(res.pitch_track_ptr, res.length));
+    }
+
+    if !res.voiced_probs_ptr.is_null() && res.length > 0 {
+        let _ = Box::from_raw(slice::from_raw_parts_mut(res.voiced_probs_ptr, res.length));
+    }
+
+    if !res.timestamps_ptr.is_null() && res.length > 0 {
+        let _ = Box::from_raw(slice::from_raw_parts_mut(res.timestamps_ptr, res.length));
+    }
+}
+
 /// Placeholder FFI function for testing build infrastructure (retained for backward compatibility)
 #[no_mangle]
 pub extern "C" fn test_ffi_bridge() -> i32 {

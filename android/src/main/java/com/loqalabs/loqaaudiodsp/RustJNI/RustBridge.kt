@@ -60,6 +60,38 @@ data class H1H2Result(
 )
 
 /**
+ * PitchTrack data class for HMM-smoothed Viterbi decoding results (v0.5.0).
+ *
+ * Unlike per-frame PitchResult, this contains the globally optimal pitch track
+ * across all frames, reducing octave errors from ~8-12% to ≤3%.
+ *
+ * @property pitchTrack Pitch estimates per frame in Hz (0.0 = unvoiced)
+ * @property voicedProbabilities Voiced probability per frame [0.0, 1.0]
+ * @property timestamps Frame timestamps in seconds from buffer start
+ */
+data class PitchTrackResult(
+    val pitchTrack: FloatArray,
+    val voicedProbabilities: FloatArray,
+    val timestamps: FloatArray
+) {
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+        other as PitchTrackResult
+        return pitchTrack.contentEquals(other.pitchTrack) &&
+            voicedProbabilities.contentEquals(other.voicedProbabilities) &&
+            timestamps.contentEquals(other.timestamps)
+    }
+
+    override fun hashCode(): Int {
+        var result = pitchTrack.contentHashCode()
+        result = 31 * result + voicedProbabilities.contentHashCode()
+        result = 31 * result + timestamps.contentHashCode()
+        return result
+    }
+}
+
+/**
  * VoiceAnalyzerConfig data class for VoiceAnalyzer initialization.
  *
  * @property sampleRate Sample rate in Hz (8000-48000)
@@ -291,6 +323,22 @@ object RustBridge {
      */
     external fun nativeVoiceAnalyzerFree(handle: Long)
 
+    /**
+     * JNI native function to process buffer with HMM-smoothed Viterbi decoding (v0.5.0).
+     *
+     * Unlike nativeVoiceAnalyzerProcessStream which treats frames independently,
+     * this method uses Viterbi decoding to find the globally optimal pitch track,
+     * reducing octave errors from ~8-12% to ≤3%.
+     *
+     * @param handle Analyzer handle from nativeVoiceAnalyzerNew
+     * @param buffer Complete audio buffer to process
+     * @return PitchTrackResult with pitchTrack, voicedProbabilities, and timestamps
+     */
+    external fun nativeVoiceAnalyzerProcessBuffer(
+        handle: Long,
+        buffer: FloatArray
+    ): PitchTrackResult
+
     // ============================================================================
     // Kotlin Wrapper Functions with Error Handling
     // ============================================================================
@@ -515,6 +563,32 @@ object RustBridge {
             nativeVoiceAnalyzerFree(handle)
         } catch (e: Exception) {
             // Log but don't throw - this is cleanup
+        }
+    }
+
+    /**
+     * Process audio buffer with HMM-smoothed Viterbi decoding (v0.5.0).
+     *
+     * Unlike processAudioWithAnalyzer which treats frames independently,
+     * this method uses Viterbi decoding to find the globally optimal pitch track,
+     * reducing octave errors from ~8-12% to ≤3% and producing smoother contours.
+     *
+     * Best suited for offline analysis of complete utterances (typically < 60 seconds).
+     * For longer recordings, segment into utterances first.
+     *
+     * @param handle Analyzer handle from createVoiceAnalyzer
+     * @param buffer Complete audio buffer to process
+     * @return PitchTrackResult with smoothed pitch estimates
+     * @throws RuntimeException if processing fails
+     */
+    fun processBufferWithAnalyzer(
+        handle: Long,
+        buffer: FloatArray
+    ): PitchTrackResult {
+        return try {
+            nativeVoiceAnalyzerProcessBuffer(handle, buffer)
+        } catch (e: Exception) {
+            throw RuntimeException("JNI call to nativeVoiceAnalyzerProcessBuffer failed", e)
         }
     }
 }

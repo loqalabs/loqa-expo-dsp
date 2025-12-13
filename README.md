@@ -19,6 +19,7 @@ Production-grade Expo native module for audio DSP analysis.
 - **HNR Analysis** - `calculateHNR()`: Harmonics-to-Noise Ratio for breathiness measurement
 - **H1-H2 Calculation** - `calculateH1H2()`: First/second harmonic amplitude difference for vocal weight
 - **VoiceAnalyzer** - `createVoiceAnalyzer()`: Streaming pitch analysis with HMM smoothing for accurate tracking across clips
+- **Offline Pitch Tracking** - `processBuffer()`: Viterbi-decoded globally optimal pitch tracks (v0.5.0+)
 
 ### Companion Package
 
@@ -259,6 +260,53 @@ try {
   await freeVoiceAnalyzer(analyzer);
 }
 ```
+
+### Offline Pitch Tracking with Viterbi Decoding (v0.5.0+)
+
+```typescript
+import { createVoiceAnalyzer, processBuffer, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+// Example: Globally optimal pitch tracking with HMM-smoothed Viterbi decoding
+// Reduces octave jump errors from ~8-12% to ≤3%
+const audioSamples = new Float32Array(44100 * 5); // 5 seconds of audio
+// ... fill buffer with complete audio recording ...
+
+const analyzer = await createVoiceAnalyzer({
+  sampleRate: 44100,
+  minPitch: 80,
+  maxPitch: 400,
+});
+
+try {
+  // processBuffer uses Viterbi decoding for globally optimal pitch path
+  // Best for offline analysis of complete recordings
+  const track = await processBuffer(analyzer, audioSamples);
+
+  console.log(`Analyzed ${track.frameCount} frames`);
+  console.log(`Voiced frames: ${track.voicedFrameCount}`);
+  console.log(`Median pitch: ${track.medianPitch?.toFixed(1)} Hz`);
+  console.log(`Mean pitch: ${track.meanPitch?.toFixed(1)} Hz`);
+
+  // Access per-frame data via Float32Arrays
+  for (let i = 0; i < track.frameCount; i++) {
+    const pitch = track.pitchTrack[i];
+    const prob = track.voicedProbabilities[i];
+    const time = track.timestamps[i];
+
+    if (pitch > 0) { // 0.0 = unvoiced frame
+      console.log(`${time.toFixed(3)}s: ${pitch.toFixed(1)} Hz (voiced prob: ${prob.toFixed(2)})`);
+    }
+  }
+} finally {
+  await freeVoiceAnalyzer(analyzer);
+}
+```
+
+**Key differences from `analyzeClip`:**
+
+- `processBuffer` uses Viterbi decoding for globally optimal pitch path (better for complete recordings)
+- `analyzeClip` provides streaming/incremental analysis (better for real-time processing)
+- `processBuffer` returns `Float32Array` for memory efficiency; `analyzeClip` returns structured frames
 
 ### Complete Voice Analysis Example
 

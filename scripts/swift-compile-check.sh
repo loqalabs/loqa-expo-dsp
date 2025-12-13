@@ -202,14 +202,34 @@ public func loqa_calculate_h1h2(_ buffer: UnsafePointer<Float>?, _ length: Int, 
     H1H2ResultFFI(success: true, h1h2: 0, h1_amplitude_db: 0, h2_amplitude_db: 0, f0: 0)
 }
 
+// PitchTrackFFI for process_buffer (v0.5.0)
+public struct PitchTrackFFI {
+    public var success: Bool
+    public var pitch_track_ptr: UnsafeMutablePointer<Float>?
+    public var voiced_probs_ptr: UnsafeMutablePointer<Float>?
+    public var timestamps_ptr: UnsafeMutablePointer<Float>?
+    public var length: Int
+    public init(success: Bool, pitch_track_ptr: UnsafeMutablePointer<Float>?, voiced_probs_ptr: UnsafeMutablePointer<Float>?, timestamps_ptr: UnsafeMutablePointer<Float>?, length: Int) {
+        self.success = success
+        self.pitch_track_ptr = pitch_track_ptr
+        self.voiced_probs_ptr = voiced_probs_ptr
+        self.timestamps_ptr = timestamps_ptr
+        self.length = length
+    }
+}
+
 // VoiceAnalyzer mock functions
 public func loqa_voice_analyzer_new(_ config: AnalysisConfigFFI) -> UnsafeMutableRawPointer? { nil }
 public func loqa_voice_analyzer_process_frame(_ analyzer: UnsafeMutableRawPointer?, _ samples: UnsafePointer<Float>?, _ len: Int) -> PitchResultFFI {
     PitchResultFFI(success: true, frequency: 0, confidence: 0, is_voiced: false, voiced_probability: 0)
 }
 public func loqa_voice_analyzer_process_stream(_ analyzer: UnsafeMutableRawPointer?, _ samples: UnsafePointer<Float>?, _ len: Int, _ results: UnsafeMutablePointer<PitchResultFFI>?, _ maxResults: Int) -> Int { 0 }
+public func loqa_voice_analyzer_process_buffer(_ analyzer: UnsafeMutableRawPointer?, _ samples: UnsafePointer<Float>?, _ len: Int) -> PitchTrackFFI {
+    PitchTrackFFI(success: true, pitch_track_ptr: nil, voiced_probs_ptr: nil, timestamps_ptr: nil, length: 0)
+}
 public func loqa_voice_analyzer_reset(_ analyzer: UnsafeMutableRawPointer?) {}
 public func loqa_voice_analyzer_free(_ analyzer: UnsafeMutableRawPointer?) {}
+public func loqa_free_pitch_track(_ result: UnsafeMutablePointer<PitchTrackFFI>?) {}
 EOF
 
 # Copy Swift files to temp dir (excluding the actual module import)

@@ -6,6 +6,7 @@ import type {
   VoiceAnalyzerHandle,
   VoiceAnalyzerResult,
   PitchResult,
+  PitchTrack,
 } from './types';
 import { logDebug } from './utils';
 import { validateSampleRate } from './validation';
@@ -254,6 +255,134 @@ export async function analyzeClip(
     });
 
     throw new NativeModuleError(`Clip analysis failed: ${errorMessage}`, {
+      originalError: error,
+      analyzerId: analyzer.id,
+      bufferLength: audioBuffer.length,
+    });
+  }
+}
+
+/**
+ * Processes a complete audio buffer with HMM-smoothed Viterbi decoding
+ *
+ * Unlike analyzeClip() which processes frames independently, this method uses
+ * Viterbi decoding to find the globally optimal pitch track across all frames.
+ * This significantly reduces octave jump errors (from ~8-12% to ≤3%) and
+ * produces smoother pitch contours.
+ *
+ * Key differences from analyzeClip():
+ * - Uses Viterbi decoding for globally optimal pitch track
+ * - Octave jump rate reduced from ~8-12% to ≤3%
+ * - Always uses pYIN algorithm regardless of config.algorithm
+ * - Higher latency (must see entire buffer) but better accuracy
+ * - Returns Float32Array for raw data (more memory efficient)
+ *
+ * Best suited for offline analysis of complete utterances (typically < 60 seconds).
+ * For longer recordings, segment into utterances first.
+ *
+ * @param analyzer - VoiceAnalyzerHandle from createVoiceAnalyzer
+ * @param audioBuffer - Complete audio buffer to analyze
+ * @returns Promise resolving to PitchTrack with optimal pitch estimates
+ * @throws ValidationError if analyzer handle or buffer is invalid
+ * @throws NativeModuleError if native processing fails
+ *
+ * @example
+ * ```typescript
+ * const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+ * const track = await processBuffer(analyzer, audioSamples);
+ *
+ * console.log(`Analyzed ${track.frameCount} frames`);
+ * console.log(`Median pitch: ${track.medianPitch} Hz`);
+ * console.log(`Octave jumps minimized with Viterbi decoding`);
+ *
+ * // Access raw pitch data
+ * for (let i = 0; i < track.pitchTrack.length; i++) {
+ *   if (track.pitchTrack[i] > 0) {
+ *     console.log(`t=${track.timestamps[i]}s: ${track.pitchTrack[i]} Hz`);
+ *   }
+ * }
+ *
+ * await freeVoiceAnalyzer(analyzer);
+ * ```
+ */
+export async function processBuffer(
+  analyzer: VoiceAnalyzerHandle,
+  audioBuffer: Float32Array | number[]
+): Promise<PitchTrack> {
+  logDebug('processBuffer called', {
+    analyzerId: analyzer.id,
+    bufferLength: audioBuffer.length,
+    bufferType: audioBuffer instanceof Float32Array ? 'Float32Array' : 'number[]',
+  });
+
+  // Validate analyzer handle
+  if (!analyzer || !analyzer.id) {
+    throw new ValidationError('Invalid analyzer handle', {
+      analyzer,
+    });
+  }
+
+  // Validate buffer
+  if (!audioBuffer || audioBuffer.length === 0) {
+    throw new ValidationError('Audio buffer cannot be empty', {
+      bufferLength: audioBuffer?.length ?? 0,
+    });
+  }
+
+  // Check for invalid values
+  const hasInvalidValues = Array.from(audioBuffer).some((v) => !isFinite(v));
+  if (hasInvalidValues) {
+    throw new ValidationError('Buffer contains NaN or Infinity values', {
+      bufferLength: audioBuffer.length,
+    });
+  }
+
+  // Convert to number[] for React Native bridge
+  const bufferArray: number[] =
+    audioBuffer instanceof Float32Array ? Array.from(audioBuffer) : audioBuffer;
+
+  try {
+    logDebug('Calling native module for buffer processing with Viterbi decoding', {
+      analyzerId: analyzer.id,
+      bufferLength: bufferArray.length,
+    });
+
+    const nativeResult = await LoqaExpoDspModule.processBuffer(analyzer.id, bufferArray);
+
+    logDebug('Native module returned pitch track', {
+      frameCount: nativeResult.frameCount,
+      voicedFrameCount: nativeResult.voicedFrameCount,
+      medianPitch: nativeResult.medianPitch,
+    });
+
+    // Convert native arrays to Float32Array for memory efficiency
+    const result: PitchTrack = {
+      pitchTrack: new Float32Array(nativeResult.pitchTrack),
+      voicedProbabilities: new Float32Array(nativeResult.voicedProbabilities),
+      timestamps: new Float32Array(nativeResult.timestamps),
+      frameCount: nativeResult.frameCount,
+      voicedFrameCount: nativeResult.voicedFrameCount,
+      medianPitch: nativeResult.medianPitch ?? null,
+      meanPitch: nativeResult.meanPitch ?? null,
+    };
+
+    logDebug('processBuffer completed successfully', {
+      frameCount: result.frameCount,
+      voicedFrameCount: result.voicedFrameCount,
+      medianPitch: result.medianPitch,
+    });
+
+    return result;
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+
+    logDebug('processBuffer failed', {
+      error: errorMessage,
+      analyzerId: analyzer.id,
+      bufferLength: audioBuffer.length,
+    });
+
+    throw new NativeModuleError(`Buffer processing failed: ${errorMessage}`, {
       originalError: error,
       analyzerId: analyzer.id,
       bufferLength: audioBuffer.length,

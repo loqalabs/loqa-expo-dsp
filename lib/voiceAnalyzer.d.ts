@@ -1,4 +1,4 @@
-import type { VoiceAnalyzerConfig, VoiceAnalyzerHandle, VoiceAnalyzerResult } from './types';
+import type { VoiceAnalyzerConfig, VoiceAnalyzerHandle, VoiceAnalyzerResult, PitchTrack } from './types';
 /**
  * Creates a new VoiceAnalyzer instance for stateful pitch tracking
  *
@@ -64,6 +64,50 @@ export declare function createVoiceAnalyzer(config: VoiceAnalyzerConfig): Promis
  * ```
  */
 export declare function analyzeClip(analyzer: VoiceAnalyzerHandle, audioBuffer: Float32Array | number[]): Promise<VoiceAnalyzerResult>;
+/**
+ * Processes a complete audio buffer with HMM-smoothed Viterbi decoding
+ *
+ * Unlike analyzeClip() which processes frames independently, this method uses
+ * Viterbi decoding to find the globally optimal pitch track across all frames.
+ * This significantly reduces octave jump errors (from ~8-12% to ≤3%) and
+ * produces smoother pitch contours.
+ *
+ * Key differences from analyzeClip():
+ * - Uses Viterbi decoding for globally optimal pitch track
+ * - Octave jump rate reduced from ~8-12% to ≤3%
+ * - Always uses pYIN algorithm regardless of config.algorithm
+ * - Higher latency (must see entire buffer) but better accuracy
+ * - Returns Float32Array for raw data (more memory efficient)
+ *
+ * Best suited for offline analysis of complete utterances (typically < 60 seconds).
+ * For longer recordings, segment into utterances first.
+ *
+ * @param analyzer - VoiceAnalyzerHandle from createVoiceAnalyzer
+ * @param audioBuffer - Complete audio buffer to analyze
+ * @returns Promise resolving to PitchTrack with optimal pitch estimates
+ * @throws ValidationError if analyzer handle or buffer is invalid
+ * @throws NativeModuleError if native processing fails
+ *
+ * @example
+ * ```typescript
+ * const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+ * const track = await processBuffer(analyzer, audioSamples);
+ *
+ * console.log(`Analyzed ${track.frameCount} frames`);
+ * console.log(`Median pitch: ${track.medianPitch} Hz`);
+ * console.log(`Octave jumps minimized with Viterbi decoding`);
+ *
+ * // Access raw pitch data
+ * for (let i = 0; i < track.pitchTrack.length; i++) {
+ *   if (track.pitchTrack[i] > 0) {
+ *     console.log(`t=${track.timestamps[i]}s: ${track.pitchTrack[i]} Hz`);
+ *   }
+ * }
+ *
+ * await freeVoiceAnalyzer(analyzer);
+ * ```
+ */
+export declare function processBuffer(analyzer: VoiceAnalyzerHandle, audioBuffer: Float32Array | number[]): Promise<PitchTrack>;
 /**
  * Resets the VoiceAnalyzer state for reuse with new audio
  *

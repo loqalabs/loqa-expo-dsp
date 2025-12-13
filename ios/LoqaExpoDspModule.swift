@@ -463,6 +463,71 @@ public class LoqaExpoDspModule: Module {
       }
     }
 
+    // MARK: - processBuffer
+    // Process audio with HMM-smoothed Viterbi decoding for globally optimal pitch track
+    // Unlike analyzeClip which treats frames independently, this uses Viterbi decoding
+    // to reduce octave errors (from ~8-12% to ≤3%) and produce smoother contours.
+    AsyncFunction("processBuffer") { (analyzerId: String, buffer: [Float], promise: Promise) in
+      do {
+        // Get analyzer handle
+        guard let handle = LoqaExpoDspModule.getAnalyzer(id: analyzerId) else {
+          promise.reject("VALIDATION_ERROR", "Invalid analyzer ID: \(analyzerId)")
+          return
+        }
+
+        guard !buffer.isEmpty else {
+          promise.reject("VALIDATION_ERROR", "Buffer cannot be empty")
+          return
+        }
+
+        // Process buffer with Viterbi decoding
+        let track = try processBufferWithAnalyzer(analyzer: handle, samples: buffer)
+
+        // Calculate aggregate statistics
+        let voicedPitches = track.pitchTrack.filter { $0 > 0 }
+        let voicedCount = voicedPitches.count
+
+        // Median pitch
+        let medianPitch: Float? = voicedPitches.isEmpty ? nil : {
+          let sorted = voicedPitches.sorted()
+          let mid = sorted.count / 2
+          if sorted.count % 2 == 0 {
+            return (sorted[mid - 1] + sorted[mid]) / 2
+          } else {
+            return sorted[mid]
+          }
+        }()
+
+        // Mean pitch
+        let meanPitch: Float? = voicedPitches.isEmpty ? nil :
+            voicedPitches.reduce(0, +) / Float(voicedPitches.count)
+
+        // Build result
+        let result: [String: Any] = [
+          "pitchTrack": track.pitchTrack,
+          "voicedProbabilities": track.voicedProbabilities,
+          "timestamps": track.timestamps,
+          "frameCount": track.pitchTrack.count,
+          "voicedFrameCount": voicedCount,
+          "medianPitch": medianPitch ?? NSNull(),
+          "meanPitch": meanPitch ?? NSNull()
+        ]
+
+        promise.resolve(result)
+      } catch let error as RustFFIError {
+        switch error {
+        case .invalidInput(let message):
+          promise.reject("VALIDATION_ERROR", message)
+        case .computationFailed(let message):
+          promise.reject("ANALYZER_ERROR", message)
+        case .memoryAllocationFailed:
+          promise.reject("ANALYZER_ERROR", "Memory allocation failed during buffer processing")
+        }
+      } catch {
+        promise.reject("ANALYZER_ERROR", error.localizedDescription)
+      }
+    }
+
     // MARK: - resetVoiceAnalyzer
     // Reset analyzer state for reuse with new audio
     AsyncFunction("resetVoiceAnalyzer") { (analyzerId: String, promise: Promise) in

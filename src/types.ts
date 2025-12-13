@@ -448,3 +448,73 @@ export interface VoiceAnalyzerResult {
    */
   meanVoicedProbability: number;
 }
+
+/**
+ * Result of processing a complete audio buffer with Viterbi decoding (v0.5.0)
+ *
+ * Unlike VoiceAnalyzerResult which analyzes frames independently, PitchTrack uses
+ * HMM-smoothed Viterbi decoding to find the globally optimal pitch track across
+ * all frames. This significantly reduces octave jump errors (from ~8-12% to ≤3%)
+ * and produces smoother pitch contours.
+ *
+ * Best suited for offline analysis of complete utterances (typically < 60 seconds).
+ * For longer recordings, segment into utterances first.
+ *
+ * **Note:** Always uses pYIN algorithm regardless of VoiceAnalyzerConfig.algorithm setting,
+ * since HMM smoothing requires the probabilistic candidates that only pYIN provides.
+ *
+ * @example
+ * ```typescript
+ * const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+ * const track = await processBuffer(analyzer, audioSamples);
+ *
+ * console.log(`Analyzed ${track.frameCount} frames`);
+ * console.log(`Median pitch: ${track.medianPitch} Hz`);
+ *
+ * // Access raw pitch track data
+ * for (let i = 0; i < track.pitchTrack.length; i++) {
+ *   const pitch = track.pitchTrack[i];
+ *   const prob = track.voicedProbabilities[i];
+ *   const time = track.timestamps[i];
+ *   if (pitch > 0) {
+ *     console.log(`t=${time.toFixed(3)}s: ${pitch.toFixed(1)} Hz (${(prob * 100).toFixed(0)}% voiced)`);
+ *   }
+ * }
+ *
+ * await freeVoiceAnalyzer(analyzer);
+ * ```
+ */
+export interface PitchTrack {
+  /**
+   * Pitch estimates per frame in Hz (0.0 = unvoiced).
+   * This is the globally optimal pitch track computed via Viterbi decoding.
+   * Length matches frameCount.
+   */
+  pitchTrack: Float32Array;
+  /**
+   * Voiced probability per frame [0.0, 1.0].
+   * Higher values indicate higher confidence that the frame contains voiced speech.
+   * Length matches frameCount.
+   */
+  voicedProbabilities: Float32Array;
+  /**
+   * Frame timestamps in seconds from buffer start.
+   * Computed as frame_index * hop_size / sample_rate.
+   * Length matches frameCount.
+   */
+  timestamps: Float32Array;
+  /** Total number of frames analyzed */
+  frameCount: number;
+  /** Number of voiced frames (pitch > 0) */
+  voicedFrameCount: number;
+  /**
+   * Median pitch across voiced frames in Hz.
+   * null if no voiced frames were detected.
+   */
+  medianPitch: number | null;
+  /**
+   * Mean pitch across voiced frames in Hz.
+   * null if no voiced frames were detected.
+   */
+  meanPitch: number | null;
+}

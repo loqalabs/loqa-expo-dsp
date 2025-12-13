@@ -5,6 +5,21 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2025-12-12
+
+### Added
+
+- **New `processBuffer()` function**: HMM-smoothed Viterbi decoding for optimal pitch tracking
+  - Unlike `analyzeClip()` which treats frames independently, `processBuffer()` finds the globally optimal pitch track across all frames
+  - Reduces octave jump errors from ~8-12% to ≤3% on real voice samples
+  - Returns `PitchTrack` type with `pitchTrack`, `voicedProbabilities`, `timestamps` as Float32Arrays
+  - Best suited for offline analysis of complete utterances (< 60 seconds)
+  - Always uses pYIN algorithm (Viterbi requires probabilistic candidates)
+
+### Changed
+
+- **Upstream upgrade**: loqa-voice-dsp 0.4.1 → 0.5.0
+
 ## [0.4.0] - 2025-12-12
 
 ### Fixed
@@ -13,12 +28,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - `calculateHNR` now correctly returns `isVoiced: true` for voiced speech
   - Previously returned `isVoiced: false` and `hnr: 0` even for clear voice recordings
   - Breathiness/airiness analysis now works reliably
-
-### Changed
-
-- **Upstream upgrade**: loqa-voice-dsp 0.4.1 → 0.5.0
-  - New `process_buffer()` method for HMM-smoothed pitch tracking using Viterbi decoding
-  - Octave jump rate reduced from ~8-12% to ≤3% on real voice samples
 
 ## [0.3.3] - 2025-12-08
 

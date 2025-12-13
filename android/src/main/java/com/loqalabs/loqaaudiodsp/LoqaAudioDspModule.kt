@@ -3,6 +3,7 @@ package com.loqalabs.loqaexpodsp
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 import com.loqalabs.loqaexpodsp.RustJNI.RustBridge
+import com.loqalabs.loqaexpodsp.RustJNI.VoiceAnalyzerConfig
 
 /**
  * LoqaExpoDspModule provides Expo Module API for accessing Rust DSP functions.
@@ -474,6 +475,66 @@ class LoqaExpoDspModule : Module() {
           "pitchStdDev" to pitchStdDev,
           "meanConfidence" to meanConfidence,
           "meanVoicedProbability" to meanVoicedProbability
+        )
+      } catch (e: RuntimeException) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      } catch (e: Exception) {
+        throw Exception("ANALYZER_ERROR: ${e.message}", e)
+      }
+    }
+
+    /**
+     * Process audio with HMM-smoothed Viterbi decoding for globally optimal pitch track (v0.5.0).
+     *
+     * Unlike analyzeClip which treats frames independently, this uses Viterbi decoding
+     * to reduce octave errors (from ~8-12% to ≤3%) and produce smoother contours.
+     *
+     * @param analyzerId Analyzer ID from createVoiceAnalyzer
+     * @param buffer Audio samples as FloatArray
+     * @return PitchTrack map with pitchTrack, voicedProbabilities, timestamps, and statistics
+     * @throws Exception with error code "ANALYZER_ERROR"
+     */
+    AsyncFunction("processBuffer") { analyzerId: String, buffer: FloatArray ->
+      try {
+        // Get analyzer handle
+        val (handle, config) = getAnalyzer(analyzerId)
+          ?: throw Exception("VALIDATION_ERROR: Invalid analyzer ID: $analyzerId")
+
+        if (buffer.isEmpty()) {
+          throw Exception("VALIDATION_ERROR: Buffer cannot be empty")
+        }
+
+        // Process buffer with Viterbi decoding
+        val track = RustBridge.processBufferWithAnalyzer(handle, buffer)
+
+        // Calculate aggregate statistics
+        val voicedPitches = track.pitchTrack.filter { it > 0 }
+        val voicedCount = voicedPitches.size
+
+        // Median pitch
+        val medianPitch: Float? = if (voicedPitches.isEmpty()) null else {
+          val sorted = voicedPitches.sorted()
+          val mid = sorted.size / 2
+          if (sorted.size % 2 == 0) {
+            (sorted[mid - 1] + sorted[mid]) / 2
+          } else {
+            sorted[mid]
+          }
+        }
+
+        // Mean pitch
+        val meanPitch: Float? = if (voicedPitches.isEmpty()) null else {
+          voicedPitches.sum() / voicedPitches.size
+        }
+
+        mapOf(
+          "pitchTrack" to track.pitchTrack.toList(),
+          "voicedProbabilities" to track.voicedProbabilities.toList(),
+          "timestamps" to track.timestamps.toList(),
+          "frameCount" to track.pitchTrack.size,
+          "voicedFrameCount" to voicedCount,
+          "medianPitch" to medianPitch,
+          "meanPitch" to meanPitch
         )
       } catch (e: RuntimeException) {
         throw Exception("ANALYZER_ERROR: ${e.message}", e)

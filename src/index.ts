@@ -21,6 +21,7 @@ export type {
   VoiceAnalyzerConfig,
   VoiceAnalyzerHandle,
   VoiceAnalyzerResult,
+  PitchTrack, // v0.5.0: HMM-smoothed Viterbi decoding result
 } from './types';
 
 // Export error classes
@@ -43,9 +44,11 @@ export { calculateHNR } from './calculateHNR';
 export { calculateH1H2 } from './calculateH1H2';
 
 // Export VoiceAnalyzer streaming API (v0.3.0)
+// processBuffer added in v0.5.0 for HMM-smoothed Viterbi decoding
 export {
   createVoiceAnalyzer,
   analyzeClip,
+  processBuffer, // v0.5.0: Viterbi-decoded pitch track
   resetVoiceAnalyzer,
   freeVoiceAnalyzer,
 } from './voiceAnalyzer';

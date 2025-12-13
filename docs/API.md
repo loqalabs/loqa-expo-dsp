@@ -1,7 +1,7 @@
 # API Reference
 
 **@loqalabs/loqa-expo-dsp**
-Version: 0.3.0
+Version: 0.5.0
 
 This document provides complete API reference for all functions, types, and options in the @loqalabs/loqa-expo-dsp module.
 
@@ -21,6 +21,7 @@ This document provides complete API reference for all functions, types, and opti
 - [VoiceAnalyzer API](#voiceanalyzer-api)
   - [createVoiceAnalyzer](#createvoiceanalyzer)
   - [analyzeClip](#analyzeclip)
+  - [processBuffer](#processbuffer)
   - [resetVoiceAnalyzer](#resetvoiceanalyzer)
   - [freeVoiceAnalyzer](#freevoiceanalyzer)
 - [Types](#types)
@@ -39,6 +40,7 @@ This document provides complete API reference for all functions, types, and opti
   - [VoiceAnalyzerConfig](#voiceanalyzerconfig)
   - [VoiceAnalyzerHandle](#voiceanalyzerhandle)
   - [VoiceAnalyzerResult](#voiceanalyzerresult)
+  - [PitchTrack](#pitchtrack)
 - [Error Handling](#error-handling)
   - [LoqaExpoDspError](#loqaexpodsperror)
   - [ValidationError](#validationerror)
@@ -580,6 +582,80 @@ try {
 
 ---
 
+### processBuffer
+
+Processes a complete audio buffer with HMM-smoothed Viterbi decoding for globally optimal pitch tracking.
+
+Unlike `analyzeClip()` which processes frames independently, `processBuffer()` uses Viterbi decoding to find the globally optimal pitch track across all frames. This significantly reduces octave jump errors (from ~8-12% to ≤3%) and produces smoother pitch contours.
+
+**Key differences from `analyzeClip()`:**
+
+- Uses Viterbi decoding for globally optimal pitch track
+- Octave jump rate reduced from ~8-12% to ≤3%
+- Always uses pYIN algorithm regardless of config settings
+- Higher latency (must see entire buffer) but better accuracy
+- Returns raw pitch data as Float32Arrays (more memory efficient)
+
+Best suited for offline analysis of complete utterances (typically < 60 seconds). For longer recordings, segment into utterances first.
+
+```typescript
+async function processBuffer(
+  analyzer: VoiceAnalyzerHandle,
+  audioBuffer: Float32Array | number[]
+): Promise<PitchTrack>;
+```
+
+#### Parameters
+
+| Parameter     | Type                       | Required | Description                                                     |
+| ------------- | -------------------------- | -------- | --------------------------------------------------------------- |
+| `analyzer`    | `VoiceAnalyzerHandle`      | Yes      | Analyzer handle from `createVoiceAnalyzer()`                    |
+| `audioBuffer` | `Float32Array \| number[]` | Yes      | Complete audio buffer to analyze (< 60 seconds recommended)     |
+
+#### Returns
+
+`Promise<PitchTrack>` - Resolves to a [PitchTrack](#pitchtrack) containing the optimal pitch track and statistics.
+
+#### Throws
+
+- `ValidationError` - If analyzer handle or buffer is invalid
+- `NativeModuleError` - If native processing fails
+
+#### Example
+
+```typescript
+import { createVoiceAnalyzer, processBuffer, freeVoiceAnalyzer } from '@loqalabs/loqa-expo-dsp';
+
+const analyzer = await createVoiceAnalyzer({ sampleRate: 44100 });
+
+try {
+  // Process with Viterbi decoding for optimal pitch track
+  const track = await processBuffer(analyzer, audioSamples);
+
+  console.log(`Analyzed ${track.frameCount} frames`);
+  console.log(`Voiced: ${track.voicedFrameCount} frames`);
+
+  if (track.medianPitch !== null) {
+    console.log(`Median pitch: ${track.medianPitch.toFixed(1)} Hz`);
+  }
+
+  // Access raw pitch track data (Float32Arrays for efficiency)
+  for (let i = 0; i < track.pitchTrack.length; i++) {
+    const pitch = track.pitchTrack[i];
+    const prob = track.voicedProbabilities[i];
+    const time = track.timestamps[i];
+
+    if (pitch > 0) {
+      console.log(`t=${time.toFixed(3)}s: ${pitch.toFixed(1)} Hz (${(prob * 100).toFixed(0)}% voiced)`);
+    }
+  }
+} finally {
+  await freeVoiceAnalyzer(analyzer);
+}
+```
+
+---
+
 ### resetVoiceAnalyzer
 
 Resets the VoiceAnalyzer state for reuse with new, independent audio.
@@ -1078,6 +1154,45 @@ interface VoiceAnalyzerResult {
 - **`medianPitch`** is recommended over `meanPitch` as it's more robust to outliers
 - **`pitchStdDev`** indicates pitch stability - lower values suggest steady pitch, higher values suggest variation or vibrato
 - **`meanVoicedProbability`** helps assess overall signal quality - very low values may indicate background noise or silence
+
+---
+
+### PitchTrack
+
+Result of processing a buffer with Viterbi decoding via `processBuffer()`.
+
+Contains the globally optimal pitch track computed via HMM-smoothed Viterbi decoding, along with voiced probabilities and timestamps. Unlike `VoiceAnalyzerResult`, this uses Float32Arrays for memory efficiency.
+
+```typescript
+interface PitchTrack {
+  pitchTrack: Float32Array;
+  voicedProbabilities: Float32Array;
+  timestamps: Float32Array;
+  frameCount: number;
+  voicedFrameCount: number;
+  medianPitch: number | null;
+  meanPitch: number | null;
+}
+```
+
+#### Properties
+
+| Property              | Type             | Description                                                                                              |
+| --------------------- | ---------------- | -------------------------------------------------------------------------------------------------------- |
+| `pitchTrack`          | `Float32Array`   | Pitch estimates per frame in Hz (0.0 = unvoiced). Globally optimal track via Viterbi decoding.          |
+| `voicedProbabilities` | `Float32Array`   | Voiced probability per frame [0.0, 1.0]. Higher values indicate higher confidence in voicing.           |
+| `timestamps`          | `Float32Array`   | Frame timestamps in seconds from buffer start. Computed as `frame_index * hop_size / sample_rate`.      |
+| `frameCount`          | `number`         | Total number of frames analyzed.                                                                         |
+| `voicedFrameCount`    | `number`         | Number of voiced frames (where pitch > 0).                                                               |
+| `medianPitch`         | `number \| null` | Median pitch across voiced frames in Hz. `null` if no voiced frames.                                     |
+| `meanPitch`           | `number \| null` | Mean pitch across voiced frames in Hz. `null` if no voiced frames.                                       |
+
+#### Usage Notes
+
+- **`pitchTrack`** contains the globally optimal pitch track - octave jumps are reduced from ~8-12% to ≤3% compared to frame-by-frame analysis
+- Use **Float32Array** methods like `forEach()`, indexing with `[]`, or spread operator `[...track.pitchTrack]` to access data
+- **`timestamps`** allows plotting pitch contours over time
+- For real-time streaming, use `analyzeClip()` instead; `processBuffer()` is best for offline analysis
 
 ---
 

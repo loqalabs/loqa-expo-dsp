@@ -615,6 +615,94 @@ public func freeVoiceAnalyzerWrapper(analyzer: VoiceAnalyzerHandle) {
     analyzer.invalidate()
 }
 
+// MARK: - PitchTrack for HMM-smoothed Viterbi decoding (v0.5.0)
+
+/// Result of process_buffer with HMM-smoothed Viterbi decoding
+public struct PitchTrack {
+    /// Pitch estimates per frame in Hz (0.0 = unvoiced)
+    public let pitchTrack: [Float]
+    /// Voiced probability per frame [0.0, 1.0]
+    public let voicedProbabilities: [Float]
+    /// Frame timestamps in seconds from buffer start
+    public let timestamps: [Float]
+}
+
+/// Process audio buffer with HMM-smoothed Viterbi decoding for globally optimal pitch track
+///
+/// Unlike `processAudioWithAnalyzer` which treats frames independently, this method uses
+/// Viterbi decoding to find the globally optimal pitch track across all frames,
+/// reducing octave errors (from ~8-12% to ≤3%) and producing smoother contours.
+///
+/// Best suited for offline analysis of complete utterances (typically < 60 seconds).
+/// For longer recordings, segment into utterances first.
+///
+/// **Note:** Always uses pYIN algorithm regardless of config settings.
+///
+/// - Parameters:
+///   - analyzer: VoiceAnalyzerHandle from createVoiceAnalyzerWrapper
+///   - samples: Complete audio buffer to analyze
+/// - Returns: PitchTrack with smoothed pitch estimates
+/// - Throws: RustFFIError if analyzer is invalid or processing fails
+public func processBufferWithAnalyzer(
+    analyzer: VoiceAnalyzerHandle,
+    samples: [Float]
+) throws -> PitchTrack {
+    guard let pointer = analyzer.getPointer() else {
+        throw RustFFIError.invalidInput("Analyzer handle is invalid")
+    }
+
+    guard !samples.isEmpty else {
+        throw RustFFIError.invalidInput("Samples cannot be empty")
+    }
+
+    // Call Rust FFI function
+    var result = samples.withUnsafeBufferPointer { samplesPtr -> PitchTrackFFI in
+        guard let samplesBase = samplesPtr.baseAddress else {
+            return PitchTrackFFI(
+                success: false,
+                pitch_track_ptr: nil,
+                voiced_probs_ptr: nil,
+                timestamps_ptr: nil,
+                length: 0
+            )
+        }
+        return loqa_voice_analyzer_process_buffer(pointer, samplesBase, samples.count)
+    }
+
+    // Check for success
+    guard result.success else {
+        throw RustFFIError.computationFailed("Buffer processing with Viterbi decoding failed")
+    }
+
+    // Copy to Swift arrays before freeing Rust memory
+    let length = result.length
+
+    var pitchTrack: [Float] = []
+    var voicedProbs: [Float] = []
+    var timestamps: [Float] = []
+
+    if let pitchPtr = result.pitch_track_ptr, length > 0 {
+        pitchTrack = Array(UnsafeBufferPointer(start: pitchPtr, count: length))
+    }
+
+    if let probsPtr = result.voiced_probs_ptr, length > 0 {
+        voicedProbs = Array(UnsafeBufferPointer(start: probsPtr, count: length))
+    }
+
+    if let timesPtr = result.timestamps_ptr, length > 0 {
+        timestamps = Array(UnsafeBufferPointer(start: timesPtr, count: length))
+    }
+
+    // Free Rust memory
+    loqa_free_pitch_track(&result)
+
+    return PitchTrack(
+        pitchTrack: pitchTrack,
+        voicedProbabilities: voicedProbs,
+        timestamps: timestamps
+    )
+}
+
 /*
  MEMORY MANAGEMENT PATTERN FOR FFI CALLS
  ========================================

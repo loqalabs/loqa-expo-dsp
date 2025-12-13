@@ -175,4 +175,29 @@ void loqa_voice_analyzer_reset(void* analyzer);
 /// Free a VoiceAnalyzer instance
 void loqa_voice_analyzer_free(void* analyzer);
 
+// MARK: - PitchTrack result for HMM-smoothed Viterbi decoding (v0.5.0)
+
+/// PitchTrack result from process_buffer (Viterbi decoding)
+/// Caller must free with loqa_free_pitch_track
+typedef struct {
+    bool success;
+    float* pitch_track_ptr;      // Pitch estimates per frame (Hz, 0.0 = unvoiced)
+    float* voiced_probs_ptr;     // Voiced probability per frame [0.0, 1.0]
+    float* timestamps_ptr;       // Frame timestamps in seconds
+    size_t length;               // Number of frames
+} PitchTrackFFI;
+
+/// Process buffer with HMM-smoothed Viterbi decoding for globally optimal pitch track
+/// Returns PitchTrackFFI - caller must free with loqa_free_pitch_track
+/// Unlike process_stream which treats frames independently, this uses Viterbi
+/// decoding to find the globally optimal pitch track, reducing octave errors.
+PitchTrackFFI loqa_voice_analyzer_process_buffer(
+    void* analyzer,
+    const float* samples,
+    size_t len
+);
+
+/// Free PitchTrackFFI memory allocated by loqa_voice_analyzer_process_buffer
+void loqa_free_pitch_track(PitchTrackFFI* result);
+
 #endif /* loqa_voice_dsp_h */
