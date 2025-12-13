@@ -70,15 +70,12 @@ describe('extractFormants', () => {
       const audioBuffer = generateVowelLikeAudio(700, 1220, 2600, sampleRate, bufferSize);
 
       // Mock native response for /a/ vowel formants
+      // Note: v0.4.0 replaced bandwidths with confidence
       mockExtractFormants.mockResolvedValueOnce({
         f1: 700,
         f2: 1220,
         f3: 2600,
-        bandwidths: {
-          f1: 50,
-          f2: 70,
-          f3: 100,
-        },
+        confidence: 0.85,
       });
 
       // Act
@@ -89,7 +86,7 @@ describe('extractFormants', () => {
       expect(result.f1).toBeCloseTo(700, 0);
       expect(result.f2).toBeCloseTo(1220, 0);
       expect(result.f3).toBeCloseTo(2600, 0);
-      expect(result.bandwidths).toBeDefined();
+      expect(result.confidence).toBeDefined();
       expect(mockExtractFormants).toHaveBeenCalledTimes(1);
     });
 
@@ -101,11 +98,7 @@ describe('extractFormants', () => {
         f1: 500,
         f2: 1500,
         f3: 2500,
-        bandwidths: {
-          f1: 60,
-          f2: 80,
-          f3: 120,
-        },
+        confidence: 0.9,
       });
 
       // Act
@@ -120,7 +113,7 @@ describe('extractFormants', () => {
       expect(result.f3).toBeLessThanOrEqual(4000);
     });
 
-    it('should return bandwidth information for each formant', async () => {
+    it('should return confidence score for formant extraction', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
 
@@ -128,21 +121,16 @@ describe('extractFormants', () => {
         f1: 600,
         f2: 1400,
         f3: 2800,
-        bandwidths: {
-          f1: 55,
-          f2: 75,
-          f3: 110,
-        },
+        confidence: 0.85,
       });
 
       // Act
       const result = await extractFormants(audioBuffer, 44100);
 
       // Assert
-      expect(result.bandwidths).toBeDefined();
-      expect(result.bandwidths.f1).toBeGreaterThan(0);
-      expect(result.bandwidths.f2).toBeGreaterThan(0);
-      expect(result.bandwidths.f3).toBeGreaterThan(0);
+      expect(result.confidence).toBeDefined();
+      expect(result.confidence).toBeGreaterThanOrEqual(0);
+      expect(result.confidence).toBeLessThanOrEqual(1);
     });
 
     it('should work with Float32Array input', async () => {
@@ -153,7 +141,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -178,7 +166,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -199,7 +187,7 @@ describe('extractFormants', () => {
           f1: 600,
           f2: 1400,
           f3: 2800,
-          bandwidths: { f1: 50, f2: 70, f3: 100 },
+          confidence: 0.85,
         });
 
         // Act
@@ -219,17 +207,18 @@ describe('extractFormants', () => {
   });
 
   describe('LPC Order Configuration Tests', () => {
-    it('should calculate default LPC order based on sample rate', async () => {
+    it('should calculate default LPC order based on sample rate (capped at 24)', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
       const sampleRate = 44100;
-      const expectedDefaultLpcOrder = Math.floor(sampleRate / 1000) + 2; // 44 + 2 = 46
+      // LPC order is now capped at 24 for numerical stability
+      const expectedDefaultLpcOrder = 24; // min(24, 44 + 2)
 
       mockExtractFormants.mockResolvedValueOnce({
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -245,15 +234,16 @@ describe('extractFormants', () => {
       );
     });
 
-    it('should use different default LPC order for different sample rates', async () => {
+    it('should use different default LPC order for different sample rates (capped at 24)', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
+      // LPC order formula: min(24, max(10, floor(sampleRate/1000) + 2))
       const testCases = [
-        { sampleRate: 8000, expectedLpcOrder: 10 }, // 8 + 2
-        { sampleRate: 16000, expectedLpcOrder: 18 }, // 16 + 2
-        { sampleRate: 22050, expectedLpcOrder: 24 }, // 22 + 2
-        { sampleRate: 44100, expectedLpcOrder: 46 }, // 44 + 2
-        { sampleRate: 48000, expectedLpcOrder: 50 }, // 48 + 2
+        { sampleRate: 8000, expectedLpcOrder: 10 }, // max(10, 8+2) = 10
+        { sampleRate: 16000, expectedLpcOrder: 18 }, // min(24, 16+2) = 18
+        { sampleRate: 22050, expectedLpcOrder: 24 }, // min(24, 22+2) = 24
+        { sampleRate: 44100, expectedLpcOrder: 24 }, // min(24, 44+2) = 24 (capped)
+        { sampleRate: 48000, expectedLpcOrder: 24 }, // min(24, 48+2) = 24 (capped)
       ];
 
       for (const { sampleRate, expectedLpcOrder } of testCases) {
@@ -261,7 +251,7 @@ describe('extractFormants', () => {
           f1: 600,
           f2: 1400,
           f3: 2800,
-          bandwidths: { f1: 50, f2: 70, f3: 100 },
+          confidence: 0.85,
         });
 
         // Act
@@ -289,7 +279,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -393,29 +383,45 @@ describe('extractFormants', () => {
       );
     });
 
-    it('should throw NativeModuleError for negative LPC order', async () => {
+    it('should clamp negative LPC order to minimum (10)', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
+      mockExtractFormants.mockResolvedValueOnce({
+        f1: 650,
+        f2: 1300,
+        f3: 2700,
+        confidence: 0.88,
+      });
 
-      // Act & Assert
-      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: -5 })).rejects.toThrow(
-        NativeModuleError
-      );
-      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: -5 })).rejects.toThrow(
-        'LPC order must be positive'
+      // Act
+      await extractFormants(audioBuffer, 44100, { lpcOrder: -5 });
+
+      // Assert: LPC order is clamped to minimum of 10
+      expect(mockExtractFormants).toHaveBeenCalledWith(
+        expect.any(Array),
+        44100,
+        expect.objectContaining({ lpcOrder: 10 })
       );
     });
 
-    it('should throw NativeModuleError for zero LPC order', async () => {
+    it('should clamp zero LPC order to minimum (10)', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
+      mockExtractFormants.mockResolvedValueOnce({
+        f1: 650,
+        f2: 1300,
+        f3: 2700,
+        confidence: 0.88,
+      });
 
-      // Act & Assert
-      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: 0 })).rejects.toThrow(
-        NativeModuleError
-      );
-      await expect(extractFormants(audioBuffer, 44100, { lpcOrder: 0 })).rejects.toThrow(
-        'LPC order must be positive'
+      // Act
+      await extractFormants(audioBuffer, 44100, { lpcOrder: 0 });
+
+      // Assert: LPC order is clamped to minimum of 10
+      expect(mockExtractFormants).toHaveBeenCalledWith(
+        expect.any(Array),
+        44100,
+        expect.objectContaining({ lpcOrder: 10 })
       );
     });
   });
@@ -463,7 +469,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -482,7 +488,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       });
 
       // Act
@@ -493,29 +499,21 @@ describe('extractFormants', () => {
       expect(callArgs[0]).toBe(audioBuffer); // Same reference
     });
 
-    it('should properly structure bandwidths object from native result', async () => {
+    it('should properly return confidence from native result', async () => {
       // Arrange
       const audioBuffer = new Float32Array(2048);
       mockExtractFormants.mockResolvedValueOnce({
         f1: 700,
         f2: 1200,
         f3: 2600,
-        bandwidths: {
-          f1: 55,
-          f2: 75,
-          f3: 110,
-        },
+        confidence: 0.92,
       });
 
       // Act
       const result = await extractFormants(audioBuffer, 44100);
 
       // Assert
-      expect(result.bandwidths).toEqual({
-        f1: 55,
-        f2: 75,
-        f3: 110,
-      });
+      expect(result.confidence).toBe(0.92);
     });
   });
 
@@ -547,7 +545,7 @@ describe('extractFormants', () => {
         f1: 650,
         f2: 1300,
         f3: 2700,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.88,
       };
 
       // Act
@@ -577,7 +575,7 @@ describe('extractFormants', () => {
         f1: 700,
         f2: 1220,
         f3: 2600,
-        bandwidths: { f1: 50, f2: 70, f3: 100 },
+        confidence: 0.9,
       });
 
       // Act
@@ -596,7 +594,7 @@ describe('extractFormants', () => {
         f1: 240,
         f2: 2400,
         f3: 3000,
-        bandwidths: { f1: 40, f2: 90, f3: 120 },
+        confidence: 0.88,
       });
 
       // Act
@@ -615,7 +613,7 @@ describe('extractFormants', () => {
         f1: 250,
         f2: 595,
         f3: 2400,
-        bandwidths: { f1: 45, f2: 60, f3: 110 },
+        confidence: 0.85,
       });
 
       // Act
@@ -634,7 +632,7 @@ describe('extractFormants', () => {
         f1: 390,
         f2: 2300,
         f3: 3000,
-        bandwidths: { f1: 55, f2: 85, f3: 115 },
+        confidence: 0.87,
       });
 
       // Act
